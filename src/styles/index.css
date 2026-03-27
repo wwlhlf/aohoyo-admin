@@ -39,10 +39,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 /* 下拉菜单 hover 样式 - 背景橙色，文字白色 */
 .el-dropdown-menu__item:not(.is-disabled):hover {
-  color: #fff !important;
+  color: var(--el-bg-color) !important;
   background-color: var(--el-color-primary) !important;
 }
 
 /* 编辑按钮蓝色 */
-.el-button.is-link:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info) { color: #1677ff; }
-.el-button.is-link:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info):hover { color: #409eff; }
+.el-button.is-link:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info) { color: var(--el-color-primary); }
+.el-button.is-link:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info):hover { color: var(--el-color-primary-light-3); }

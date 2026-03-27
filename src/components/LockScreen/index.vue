@@ -71,7 +71,7 @@ const handleUnlock = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, var(--el-color-primary) 0%, #ff9a56 100%);
+  background: linear-gradient(135deg, var(--el-color-primary) 0%, var(--el-color-primary-light-3) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,7 +80,7 @@ const handleUnlock = () => {
 
 .lock-content {
   text-align: center;
-  color: #fff;
+  color: var(--el-text-color-primary);
 }
 
 .time {
@@ -89,9 +89,7 @@ const handleUnlock = () => {
   margin-bottom: 40px;
 }
 
-.avatar {
-  margin-bottom: 16px;
-}
+.avatar { margin-bottom: 16px; }
 
 .username {
   font-size: 20px;
@@ -104,12 +102,10 @@ const handleUnlock = () => {
   justify-content: center;
 }
 
-.unlock-form .el-input {
-  width: 200px;
-}
+.unlock-form .el-input { width: 200px; }
 
 .error {
   margin-top: 16px;
-  color: #ff6b6b;
+  color: var(--el-color-danger);
 }
 </style>

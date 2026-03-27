@@ -224,7 +224,7 @@ document.addEventListener('click', () => {
 .tab-item.is-active {
   background: var(--el-color-primary);
   border-color: var(--el-color-primary);
-  color: #fff;
+  color: var(--el-bg-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 

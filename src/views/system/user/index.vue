@@ -5,10 +5,46 @@ import type { FormInstance, FormRules } from 'element-plus'
 
 // 表格数据
 const tableData = ref([
-  { id: 1, username: 'admin', nickname: '超级管理员', email: 'admin@aohoyo.com', phone: '13800138000', status: 1, roles: ['admin'], createTime: '2026-01-01 00:00:00' },
-  { id: 2, username: 'zhangsan', nickname: '张三', email: 'zhangsan@aohoyo.com', phone: '13800138001', status: 1, roles: ['user'], createTime: '2026-02-01 10:00:00' },
-  { id: 3, username: 'lisi', nickname: '李四', email: 'lisi@aohoyo.com', phone: '13800138002', status: 1, roles: ['user'], createTime: '2026-02-15 14:30:00' },
-  { id: 4, username: 'wangwu', nickname: '王五', email: 'wangwu@aohoyo.com', phone: '13800138003', status: 0, roles: ['user'], createTime: '2026-03-01 09:00:00' }
+  {
+    id: 1,
+    username: 'admin',
+    nickname: '超级管理员',
+    email: 'admin@aohoyo.com',
+    phone: '13800138000',
+    status: 1,
+    roles: ['admin'],
+    createTime: '2026-01-01 00:00:00'
+  },
+  {
+    id: 2,
+    username: 'zhangsan',
+    nickname: '张三',
+    email: 'zhangsan@aohoyo.com',
+    phone: '13800138001',
+    status: 1,
+    roles: ['user'],
+    createTime: '2026-02-01 10:00:00'
+  },
+  {
+    id: 3,
+    username: 'lisi',
+    nickname: '李四',
+    email: 'lisi@aohoyo.com',
+    phone: '13800138002',
+    status: 1,
+    roles: ['user'],
+    createTime: '2026-02-15 14:30:00'
+  },
+  {
+    id: 4,
+    username: 'wangwu',
+    nickname: '王五',
+    email: 'wangwu@aohoyo.com',
+    phone: '13800138003',
+    status: 0,
+    roles: ['user'],
+    createTime: '2026-03-01 09:00:00'
+  }
 ])
 
 const loading = ref(false)
@@ -101,7 +137,7 @@ const handleDelete = (row: any) => {
 // 提交
 const handleSubmit = async () => {
   if (!formRef.value) return
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(valid => {
     if (valid) {
       ElMessage.success(formData.id ? '修改成功' : '新增成功')
       dialogVisible.value = false
@@ -151,14 +187,14 @@ onMounted(() => {
 
       <!-- 操作按钮 -->
       <div class="mb-4">
-        <el-button type="primary" v-permission="'user:create'" @click="handleAdd">
+        <el-button v-permission="'user:create'" type="primary" @click="handleAdd">
           <el-icon><Plus /></el-icon>
           新增用户
         </el-button>
       </div>
 
       <!-- 表格 -->
-      <el-table :data="tableData" v-loading="loading" stripe border>
+      <el-table v-loading="loading" :data="tableData" stripe border>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="nickname" label="昵称" width="120" />
@@ -166,7 +202,14 @@ onMounted(() => {
         <el-table-column prop="phone" label="手机号" width="130" />
         <el-table-column label="角色" width="150">
           <template #default="{ row }">
-            <el-tag v-for="role in row.roles" :key="role" size="small" class="mr-1" type="primary" effect="dark">
+            <el-tag
+              v-for="role in row.roles"
+              :key="role"
+              size="small"
+              class="mr-1"
+              type="primary"
+              effect="dark"
+            >
               {{ role }}
             </el-tag>
           </template>
@@ -184,10 +227,16 @@ onMounted(() => {
         <el-table-column prop="createTime" label="创建时间" width="170" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" link v-permission="'user:edit'" @click="handleEdit(row)">
+            <el-button v-permission="'user:edit'" size="small" link @click="handleEdit(row)">
               编辑
             </el-button>
-            <el-button type="danger" size="small" link v-permission="'user:delete'" @click="handleDelete(row)">
+            <el-button
+              v-permission="'user:delete'"
+              type="danger"
+              size="small"
+              link
+              @click="handleDelete(row)"
+            >
               删除
             </el-button>
           </template>

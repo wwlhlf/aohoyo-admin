@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import defaultSettings from '@/config/settings'
+import { encode, decode } from '@/utils/crypto'
 
 type ThemeMode = 'light' | 'dark'
 
@@ -17,6 +18,7 @@ interface ThemeState {
   lockScreenEnabled: boolean
   notificationEnabled: boolean
   refreshEnabled: boolean
+  languageEnabled: boolean
   // 锁屏状态
   isLocked: boolean
   lockPassword: string
@@ -36,6 +38,7 @@ export const useThemeStore = defineStore('theme', {
     lockScreenEnabled: defaultSettings.features.lockScreen,
     notificationEnabled: defaultSettings.features.notification,
     refreshEnabled: defaultSettings.features.refresh,
+    languageEnabled: defaultSettings.features.language ?? true,
     isLocked: false,
     lockPassword: ''
   }),
@@ -96,20 +99,35 @@ export const useThemeStore = defineStore('theme', {
     toggleRefresh() {
       this.refreshEnabled = !this.refreshEnabled
     },
+    toggleLanguage() {
+      this.languageEnabled = !this.languageEnabled
+    },
 
     // 锁屏
     lock() {
       this.isLocked = true
     },
-    unlock(password: string) {
-      if (this.lockPassword && this.lockPassword !== password) {
-        return false
+    unlock(password: string): boolean {
+      // 未设置密码，直接解锁
+      if (!this.lockPassword) {
+        this.$patch({ isLocked: false })
+        return true
       }
-      this.isLocked = false
-      return true
+
+      // 验证密码
+      const storedPassword = decode(this.lockPassword)
+      if (storedPassword === password) {
+        this.$patch({ isLocked: false })
+        return true
+      }
+      return false
     },
     setLockPassword(password: string) {
-      this.lockPassword = password
+      this.lockPassword = encode(password)
+    },
+    // 清除锁屏密码
+    clearLockPassword() {
+      this.$patch({ lockPassword: '', isLocked: false })
     },
 
     // 应用主题
@@ -126,13 +144,19 @@ export const useThemeStore = defineStore('theme', {
       const lighten = (color: string, amount: number) => {
         const num = parseInt(color.replace('#', ''), 16)
         const r = Math.min(255, Math.floor((num >> 16) + (255 - (num >> 16)) * amount))
-        const g = Math.min(255, Math.floor(((num >> 8) & 0x00FF) + (255 - ((num >> 8) & 0x00FF)) * amount))
-        const b = Math.min(255, Math.floor((num & 0x0000FF) + (255 - (num & 0x0000FF)) * amount))
+        const g = Math.min(
+          255,
+          Math.floor(((num >> 8) & 0x00ff) + (255 - ((num >> 8) & 0x00ff)) * amount)
+        )
+        const b = Math.min(255, Math.floor((num & 0x0000ff) + (255 - (num & 0x0000ff)) * amount))
         return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
       }
 
       for (let i = 1; i <= 9; i++) {
-        html.style.setProperty(`--el-color-primary-light-${10 - i}`, lighten(this.primaryColor, i * 0.1))
+        html.style.setProperty(
+          `--el-color-primary-light-${10 - i}`,
+          lighten(this.primaryColor, i * 0.1)
+        )
       }
     },
 

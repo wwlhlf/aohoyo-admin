@@ -1,76 +1,102 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 
+const { t } = useI18n()
 const userStore = useUserStore()
 </script>
 
 <template>
-  <div class="dashboard p-6">
-    <h1 class="text-2xl font-bold mb-4">欢迎回来，{{ userStore.userInfo?.nickname || userStore.username || '用户' }}！</h1>
+  <div class="dashboard">
+    <h1 class="welcome-title">
+      {{ t('dashboard.welcome') }}，{{
+        userStore.userInfo?.nickname || userStore.username || '用户'
+      }}！
+    </h1>
 
-    <el-row :gutter="20" class="mb-6">
+    <el-row :gutter="20" class="stat-row">
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value text-primary">1,234</div>
-            <div class="stat-label">今日访问</div>
+            <div class="stat-value" style="color: var(--el-color-primary)">1,234</div>
+            <div class="stat-label">{{ t('dashboard.todayVisit') }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value text-green-500">56</div>
-            <div class="stat-label">新增用户</div>
+            <div class="stat-value" style="color: var(--el-color-success)">56</div>
+            <div class="stat-label">{{ t('dashboard.newUsers') }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value text-blue-500">89%</div>
-            <div class="stat-label">系统负载</div>
+            <div class="stat-value" style="color: var(--el-color-primary)">89%</div>
+            <div class="stat-label">{{ t('dashboard.systemLoad') }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value text-purple-500">99.9%</div>
-            <div class="stat-label">系统可用性</div>
+            <div class="stat-value" style="color: #9b59b6">99.9%</div>
+            <div class="stat-label">{{ t('dashboard.availability') }}</div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-card class="mb-6">
+    <el-card class="quick-start-card">
       <template #header>
-        <span>快速开始</span>
+        <span>{{ t('dashboard.quickStart') }}</span>
       </template>
       <el-space wrap>
-        <el-button type="primary">新建项目</el-button>
-        <el-button>查看文档</el-button>
-        <el-button>系统设置</el-button>
+        <el-button type="primary">{{ t('dashboard.newProject') }}</el-button>
+        <el-button>{{ t('dashboard.viewDocs') }}</el-button>
+        <el-button>{{ t('dashboard.systemSettings') }}</el-button>
       </el-space>
     </el-card>
 
     <el-card>
       <template #header>
-        <span>系统信息</span>
+        <span>{{ t('dashboard.systemInfo') }}</span>
       </template>
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="框架版本">Vue 3.x</el-descriptions-item>
-        <el-descriptions-item label="UI 组件">Element Plus</el-descriptions-item>
-        <el-descriptions-item label="构建工具">Vite</el-descriptions-item>
-        <el-descriptions-item label="样式方案">UnoCSS</el-descriptions-item>
-        <el-descriptions-item label="状态管理">Pinia</el-descriptions-item>
-        <el-descriptions-item label="主题色">#F37021 (爱马仕橙)</el-descriptions-item>
+        <el-descriptions-item :label="t('dashboard.frameworkVersion')">
+          Vue 3.x
+        </el-descriptions-item>
+        <el-descriptions-item :label="t('dashboard.uiComponent')">
+          Element Plus
+        </el-descriptions-item>
+        <el-descriptions-item :label="t('dashboard.buildTool')">Vite</el-descriptions-item>
+        <el-descriptions-item :label="t('dashboard.styleSolution')">SCSS</el-descriptions-item>
+        <el-descriptions-item :label="t('dashboard.stateManagement')">Pinia</el-descriptions-item>
+        <el-descriptions-item :label="t('dashboard.themeColor')">
+          #F37021 (爱马仕橙)
+        </el-descriptions-item>
       </el-descriptions>
     </el-card>
   </div>
 </template>
 
 <style scoped>
+.dashboard {
+  padding: 24px;
+}
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.stat-row {
+  margin-bottom: 24px;
+}
+
 .stat-card {
   cursor: pointer;
   transition: transform 0.2s;
@@ -92,6 +118,10 @@ const userStore = useUserStore()
 }
 
 .stat-label {
-  color: var(--text-color-secondary);
+  color: var(--el-text-color-secondary);
+}
+
+.quick-start-card {
+  margin-bottom: 24px;
 }
 </style>

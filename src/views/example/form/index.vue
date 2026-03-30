@@ -30,15 +30,13 @@ const rules: FormRules = {
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ],
-  gender: [
-    { required: true, message: '请选择性别', trigger: 'change' }
-  ]
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
 }
 
 // 提交
 const handleSubmit = async () => {
   if (!formRef.value) return
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(valid => {
     if (valid) {
       ElMessage.success('提交成功！')
     }

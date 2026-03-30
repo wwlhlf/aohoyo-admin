@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
@@ -21,27 +23,27 @@ const formData = reactive({
 
 // 表单规则
 const rules: FormRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  username: [{ required: true, message: t('login.username') + '...', trigger: 'blur' }],
+  password: [{ required: true, message: t('login.password') + '...', trigger: 'blur' }]
 }
 
 // 登录
 const handleLogin = async () => {
   if (!formRef.value) return
 
-  await formRef.value.validate(async (valid) => {
+  await formRef.value.validate(async valid => {
     if (!valid) return
 
     loading.value = true
     try {
       await userStore.login(formData.username, formData.password)
-      ElMessage.success('登录成功！')
+      ElMessage.success(t('login.loginSuccess'))
 
       // 跳转到目标页面或首页
       const redirect = (route.query.redirect as string) || '/'
       router.push(redirect)
     } catch (error) {
-      ElMessage.error('登录失败，请检查用户名和密码')
+      ElMessage.error(t('login.loginFailed'))
     } finally {
       loading.value = false
     }
@@ -61,7 +63,7 @@ const handleKeyup = (e: KeyboardEvent) => {
     <div class="login-box">
       <!-- Logo -->
       <div class="login-header">
-        <img src="/logo.svg" alt="Logo" class="login-logo" />
+        <img src="/logo.png" alt="Logo" class="login-logo" />
         <h1 class="login-title">Aohoyo Admin</h1>
         <p class="login-subtitle">通用后台管理系统</p>
       </div>
@@ -71,7 +73,7 @@ const handleKeyup = (e: KeyboardEvent) => {
         <el-form-item prop="username">
           <el-input
             v-model="formData.username"
-            placeholder="请输入用户名"
+            :placeholder="t('login.username')"
             prefix-icon="User"
             size="large"
           />
@@ -81,7 +83,7 @@ const handleKeyup = (e: KeyboardEvent) => {
           <el-input
             v-model="formData.password"
             type="password"
-            placeholder="请输入密码"
+            :placeholder="t('login.password')"
             prefix-icon="Lock"
             size="large"
             show-password
@@ -96,7 +98,7 @@ const handleKeyup = (e: KeyboardEvent) => {
             class="login-btn"
             @click="handleLogin"
           >
-            {{ loading ? '登录中...' : '登 录' }}
+            {{ loading ? t('common.loading') : t('login.loginBtn') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -146,7 +148,7 @@ const handleKeyup = (e: KeyboardEvent) => {
 
 .login-subtitle {
   margin: 8px 0 0;
-  color: var(--text-color-secondary);
+  color: var(--el-text-color-secondary);
 }
 
 .login-form {
@@ -160,7 +162,7 @@ const handleKeyup = (e: KeyboardEvent) => {
 .login-footer {
   margin-top: 24px;
   text-align: center;
-  color: var(--text-color-secondary);
+  color: var(--el-text-color-secondary);
   font-size: 12px;
 }
 </style>

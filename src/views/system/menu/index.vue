@@ -9,44 +9,94 @@ const iconList = Object.keys(ElementPlusIconsVue)
 
 // 表格数据 - 树形结构
 const tableData = ref([
-  { 
-    id: 1, 
-    parentId: 0, 
-    name: '首页', 
-    path: '/dashboard', 
-    icon: 'HomeFilled', 
-    sort: 1, 
-    status: 1, 
+  {
+    id: 1,
+    parentId: 0,
+    name: '首页',
+    path: '/dashboard',
+    icon: 'HomeFilled',
+    sort: 1,
+    status: 1,
     type: 'menu',
     children: []
   },
-  { 
-    id: 2, 
-    parentId: 0, 
-    name: '系统管理', 
-    path: '/system', 
-    icon: 'Setting', 
-    sort: 2, 
-    status: 1, 
+  {
+    id: 2,
+    parentId: 0,
+    name: '系统管理',
+    path: '/system',
+    icon: 'Setting',
+    sort: 2,
+    status: 1,
     type: 'dir',
     children: [
-      { id: 3, parentId: 2, name: '用户管理', path: '/system/user', icon: 'User', sort: 1, status: 1, type: 'menu', children: [] },
-      { id: 4, parentId: 2, name: '角色管理', path: '/system/role', icon: 'UserFilled', sort: 2, status: 1, type: 'menu', children: [] },
-      { id: 5, parentId: 2, name: '菜单管理', path: '/system/menu', icon: 'Menu', sort: 3, status: 1, type: 'menu', children: [] }
+      {
+        id: 3,
+        parentId: 2,
+        name: '用户管理',
+        path: '/system/user',
+        icon: 'User',
+        sort: 1,
+        status: 1,
+        type: 'menu',
+        children: []
+      },
+      {
+        id: 4,
+        parentId: 2,
+        name: '角色管理',
+        path: '/system/role',
+        icon: 'UserFilled',
+        sort: 2,
+        status: 1,
+        type: 'menu',
+        children: []
+      },
+      {
+        id: 5,
+        parentId: 2,
+        name: '菜单管理',
+        path: '/system/menu',
+        icon: 'Menu',
+        sort: 3,
+        status: 1,
+        type: 'menu',
+        children: []
+      }
     ]
   },
-  { 
-    id: 6, 
-    parentId: 0, 
-    name: '示例页面', 
-    path: '/example', 
-    icon: 'Document', 
-    sort: 3, 
-    status: 1, 
+  {
+    id: 6,
+    parentId: 0,
+    name: '示例页面',
+    path: '/example',
+    icon: 'Document',
+    sort: 3,
+    status: 1,
     type: 'dir',
     children: [
-      { id: 7, parentId: 6, name: '表格示例', path: '/example/table', icon: 'Grid', sort: 1, status: 1, type: 'menu', children: [] },
-      { id: 8, parentId: 6, name: '表单示例', path: '/example/form', icon: 'EditPen', sort: 2, status: 1, type: 'menu', children: [] }
+      {
+        id: 7,
+        parentId: 6,
+        name: '表格示例',
+        path: '/example/table',
+        icon: 'Grid',
+        sort: 1,
+        status: 1,
+        type: 'menu',
+        children: []
+      },
+      {
+        id: 8,
+        parentId: 6,
+        name: '表单示例',
+        path: '/example/form',
+        icon: 'EditPen',
+        sort: 2,
+        status: 1,
+        type: 'menu',
+        children: []
+      }
     ]
   }
 ])
@@ -138,7 +188,7 @@ const handleDelete = (row: any) => {
 // 提交
 const handleSubmit = async () => {
   if (!formRef.value) return
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(valid => {
     if (valid) {
       ElMessage.success(formData.id ? '修改成功' : '新增成功')
       dialogVisible.value = false
@@ -188,8 +238,8 @@ onMounted(() => {
 
       <!-- 表格 - 树形结构 -->
       <el-table
-        :data="tableData"
         v-loading="loading"
+        :data="tableData"
         row-key="id"
         border
         default-expand-all
@@ -206,8 +256,8 @@ onMounted(() => {
         <el-table-column prop="path" label="路由路径" min-width="180" />
         <el-table-column label="类型" width="90" align="center">
           <template #default="{ row }">
-            <el-tag 
-              :type="row.type === 'dir' ? 'primary' : row.type === 'menu' ? 'success' : 'warning'" 
+            <el-tag
+              :type="row.type === 'dir' ? 'primary' : row.type === 'menu' ? 'success' : 'warning'"
               size="small"
               effect="dark"
             >
@@ -225,15 +275,17 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="row.type !== 'button'" type="primary" size="small" link @click="handleAdd(row.id)">
+            <el-button
+              v-if="row.type !== 'button'"
+              type="primary"
+              size="small"
+              link
+              @click="handleAdd(row.id)"
+            >
               新增
             </el-button>
-            <el-button size="small" link @click="handleEdit(row)">
-              编辑
-            </el-button>
-            <el-button type="danger" size="small" link @click="handleDelete(row)">
-              删除
-            </el-button>
+            <el-button size="small" link @click="handleEdit(row)">编辑</el-button>
+            <el-button type="danger" size="small" link @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -276,8 +328,8 @@ onMounted(() => {
           <!-- 图标选择面板 -->
           <div v-if="iconPickerVisible" class="icon-picker-panel">
             <div class="icon-grid">
-              <div 
-                v-for="icon in iconList" 
+              <div
+                v-for="icon in iconList"
                 :key="icon"
                 class="icon-item"
                 :class="{ active: formData.icon === icon }"

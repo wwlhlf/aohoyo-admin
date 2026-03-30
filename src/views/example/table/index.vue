@@ -10,8 +10,8 @@ const tableData = ref([
 ])
 
 // 状态标签
-const getStatusType = (status: number) => status === 1 ? 'success' : 'danger'
-const getStatusText = (status: number) => status === 1 ? '启用' : '禁用'
+const getStatusType = (status: number) => (status === 1 ? 'success' : 'danger')
+const getStatusText = (status: number) => (status === 1 ? '启用' : '禁用')
 </script>
 
 <template>

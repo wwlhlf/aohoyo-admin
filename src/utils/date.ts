@@ -53,14 +53,22 @@ export function isBefore(date1: string | Date, date2: string | Date): boolean {
 /**
  * 日期加法
  */
-export function addDate(date: string | Date, value: number, unit: dayjs.ManipulateType = 'day'): string {
+export function addDate(
+  date: string | Date,
+  value: number,
+  unit: dayjs.ManipulateType = 'day'
+): string {
   return dayjs(date).add(value, unit).format('YYYY-MM-DD')
 }
 
 /**
  * 日期减法
  */
-export function subtractDate(date: string | Date, value: number, unit: dayjs.ManipulateType = 'day'): string {
+export function subtractDate(
+  date: string | Date,
+  value: number,
+  unit: dayjs.ManipulateType = 'day'
+): string {
   return dayjs(date).subtract(value, unit).format('YYYY-MM-DD')
 }
 

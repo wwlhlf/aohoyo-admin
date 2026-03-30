@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const visible = ref(false)
 
@@ -19,7 +22,7 @@ const open = () => {
 
 // 全部已读
 const markAllRead = () => {
-  notifications.value.forEach(n => n.read = true)
+  notifications.value.forEach(n => (n.read = true))
   unreadCount.value = 0
 }
 
@@ -61,7 +64,7 @@ defineExpose({ open })
   >
     <template #reference>
       <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
-        <el-tooltip content="通知" placement="bottom">
+        <el-tooltip :content="t('header.notification')" placement="bottom">
           <el-icon class="header-icon"><Bell /></el-icon>
         </el-tooltip>
       </el-badge>
@@ -69,16 +72,20 @@ defineExpose({ open })
 
     <div class="notification-panel">
       <div class="header">
-        <span>通知</span>
+        <span>{{ t('notification.title') }}</span>
         <div class="actions">
-          <el-button type="primary" link size="small" @click="markAllRead">全部已读</el-button>
-          <el-button type="danger" link size="small" @click="clearAll">清空</el-button>
+          <el-button type="primary" link size="small" @click="markAllRead">
+            {{ t('notification.markAllRead') }}
+          </el-button>
+          <el-button type="danger" link size="small" @click="clearAll">
+            {{ t('notification.clear') }}
+          </el-button>
         </div>
       </div>
 
       <el-scrollbar max-height="300px">
         <div v-if="notifications.length === 0" class="empty">
-          <el-empty description="暂无通知" :image-size="80" />
+          <el-empty :description="t('notification.noNotification')" :image-size="80" />
         </div>
         <div v-else class="notification-list">
           <div
@@ -86,14 +93,22 @@ defineExpose({ open })
             :key="item.id"
             :class="['notification-item', { unread: !item.read }]"
           >
-            <div class="dot" v-if="!item.read"></div>
+            <div v-if="!item.read" class="dot"></div>
             <div class="content">
               <div class="title">{{ item.title }}</div>
               <div class="desc">{{ item.content }}</div>
               <div class="time">{{ item.time }}</div>
             </div>
             <div class="actions">
-              <el-button v-if="!item.read" type="primary" link size="small" @click="markRead(item.id)">标记已读</el-button>
+              <el-button
+                v-if="!item.read"
+                type="primary"
+                link
+                size="small"
+                @click="markRead(item.id)"
+              >
+                {{ t('notification.markRead') }}
+              </el-button>
               <el-icon class="close" @click="remove(item.id)"><Close /></el-icon>
             </div>
           </div>
@@ -104,7 +119,10 @@ defineExpose({ open })
 </template>
 
 <style scoped>
-.notification-panel { margin: -12px; min-width: 280px; }
+.notification-panel {
+  margin: -12px;
+  min-width: 280px;
+}
 
 .header {
   display: flex;
@@ -115,9 +133,14 @@ defineExpose({ open })
   font-weight: 500;
 }
 
-.header .actions { display: flex; gap: 8px; }
+.header .actions {
+  display: flex;
+  gap: 8px;
+}
 
-.empty { padding: 20px; }
+.empty {
+  padding: 20px;
+}
 
 .notification-item {
   display: flex;
@@ -128,7 +151,9 @@ defineExpose({ open })
   transition: background 0.2s;
 }
 
-.notification-item:hover { background: var(--el-fill-color-light); }
+.notification-item:hover {
+  background: var(--el-fill-color-light);
+}
 
 .notification-item.unread .dot {
   width: 6px;
@@ -138,13 +163,29 @@ defineExpose({ open })
   border-radius: 50%;
 }
 
-.content { flex: 1; }
+.content {
+  flex: 1;
+}
 
-.title { font-weight: 500; margin-bottom: 4px; }
-.desc { font-size: 13px; color: var(--el-text-color-secondary); margin-bottom: 4px; }
-.time { font-size: 12px; color: var(--el-text-color-placeholder); }
+.title {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.desc {
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 4px;
+}
+.time {
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
 
-.notification-item .actions { display: flex; align-items: center; gap: 4px; }
+.notification-item .actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
 .close {
   color: var(--el-text-color-placeholder);
@@ -152,5 +193,7 @@ defineExpose({ open })
   transition: color 0.2s;
 }
 
-.close:hover { color: var(--el-color-danger); }
+.close:hover {
+  color: var(--el-color-danger);
+}
 </style>

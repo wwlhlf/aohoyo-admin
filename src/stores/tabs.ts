@@ -20,7 +20,10 @@ const migrateIcon = (icon?: string): string | undefined => {
     const parts = icon.split(':')
     const name = parts[1] || ''
     // kebab-case 转 PascalCase: user-filled → UserFilled
-    return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('')
+    return name
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('')
   }
   return icon
 }
@@ -69,8 +72,8 @@ export const useTabsStore = defineStore('tabs', {
       const index = this.tabList.findIndex(item => item.path === path)
       if (index > -1) {
         this.tabList = this.tabList.slice(index)
-        this.cachedViews = this.cachedViews.filter(
-          view => this.tabList.some(tab => tab.path === view)
+        this.cachedViews = this.cachedViews.filter(view =>
+          this.tabList.some(tab => tab.path === view)
         )
       }
     },
@@ -80,8 +83,8 @@ export const useTabsStore = defineStore('tabs', {
       const index = this.tabList.findIndex(item => item.path === path)
       if (index > -1) {
         this.tabList = this.tabList.slice(0, index + 1)
-        this.cachedViews = this.cachedViews.filter(
-          view => this.tabList.some(tab => tab.path === view)
+        this.cachedViews = this.cachedViews.filter(view =>
+          this.tabList.some(tab => tab.path === view)
         )
       }
     },
@@ -90,21 +93,6 @@ export const useTabsStore = defineStore('tabs', {
     closeAllTabs() {
       this.tabList = []
       this.cachedViews = []
-    },
-
-    // 添加缓存视图
-    addCachedView(view: string) {
-      if (!this.cachedViews.includes(view)) {
-        this.cachedViews.push(view)
-      }
-    },
-
-    // 移除缓存视图
-    removeCachedView(view: string) {
-      const index = this.cachedViews.indexOf(view)
-      if (index > -1) {
-        this.cachedViews.splice(index, 1)
-      }
     },
 
     // 迁移所有标签的图标格式

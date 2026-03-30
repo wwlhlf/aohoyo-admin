@@ -22,11 +22,7 @@ const sizeStyle = computed(() => {
 </script>
 
 <template>
-  <svg
-    class="svg-icon"
-    :style="sizeStyle"
-    aria-hidden="true"
-  >
+  <svg class="svg-icon" :style="sizeStyle" aria-hidden="true">
     <use :xlink:href="symbolId" :fill="color" />
   </svg>
 </template>

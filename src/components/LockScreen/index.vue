@@ -1,65 +1,204 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
 
+const { t } = useI18n()
 const themeStore = useThemeStore()
 const userStore = useUserStore()
 
 const password = ref('')
 const error = ref(false)
-const currentTime = ref(new Date().toLocaleString())
+const showSetPassword = ref(false)
+const newPassword = ref('')
+const confirmPassword = ref('')
+const setPasswordError = ref('')
+const isDev = import.meta.env.DEV
 
-// 更新时间
-setInterval(() => {
-  currentTime.value = new Date().toLocaleString()
-}, 1000)
+// 解锁标记：先禁用昂贵 CSS，再移除 DOM
+const unlocking = ref(false)
 
-// 用户信息
-const username = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户')
+const isLocked = computed(() => themeStore.isLocked)
 
-// 解锁
-const handleUnlock = () => {
-  if (themeStore.unlock(password.value)) {
-    password.value = ''
-    error.value = false
-  } else {
-    error.value = true
+// 时间
+const timeStr = ref('')
+const dateStr = ref('')
+let timer: ReturnType<typeof setInterval> | null = null
+
+const updateTime = () => {
+  const now = new Date()
+  timeStr.value = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  dateStr.value = `${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`
+}
+
+const startTimer = () => {
+  stopTimer()
+  updateTime()
+  timer = setInterval(updateTime, 1000)
+}
+
+const stopTimer = () => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
   }
+}
+
+// 按 isLocked 管理 timer
+watch(isLocked, val => {
+  if (val) {
+    startTimer()
+    unlocking.value = false
+  } else {
+    stopTimer()
+  }
+})
+
+onMounted(() => {
+  if (isLocked.value) startTimer()
+})
+
+onUnmounted(() => {
+  stopTimer()
+})
+
+const username = computed(
+  () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
+)
+const hasPassword = computed(() => !!themeStore.lockPassword)
+
+// 解锁：本地验证 → 禁用 CSS → nextTick 更新 store
+const handleUnlock = () => {
+  const pwd = password.value
+
+  // 使用 store 验证密码
+  if (!themeStore.unlock(pwd)) {
+    error.value = true
+    setTimeout(() => (error.value = false), 2000)
+    return
+  }
+
+  // 验证通过 → 立即隐藏
+  unlocking.value = true
+  stopTimer()
+  error.value = false
+  password.value = ''
+}
+
+// 设置密码
+const handleSetPassword = () => {
+  if (newPassword.value.length < 4) {
+    setPasswordError.value = t('lockScreen.passwordMinLength')
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    setPasswordError.value = t('lockScreen.passwordMismatch')
+    return
+  }
+
+  themeStore.setLockPassword(newPassword.value)
+  newPassword.value = ''
+  confirmPassword.value = ''
+  setPasswordError.value = ''
+  showSetPassword.value = false
+}
+
+const handleClearPassword = () => {
+  themeStore.clearLockPassword()
+  showSetPassword.value = false
 }
 </script>
 
 <template>
-  <div class="lock-screen" v-if="themeStore.isLocked">
-    <div class="lock-content">
+  <div v-if="isLocked" class="lock-screen" :class="{ unlocking }">
+    <div class="lock-card">
       <!-- 时间 -->
-      <div class="time">{{ currentTime }}</div>
-      
-      <!-- 用户头像 -->
-      <el-avatar :size="80" class="avatar">
-        {{ username.charAt(0).toUpperCase() }}
-      </el-avatar>
-      
-      <!-- 用户名 -->
+      <div class="time">{{ timeStr }}</div>
+      <div class="date">{{ dateStr }}</div>
+
+      <!-- 用户 -->
+      <el-avatar :size="64" class="avatar">{{ username.charAt(0).toUpperCase() }}</el-avatar>
       <div class="username">{{ username }}</div>
-      
-      <!-- 解锁表单 -->
-      <div class="unlock-form">
+
+      <!-- 设置密码 -->
+      <template v-if="showSetPassword">
+        <el-input
+          v-model="newPassword"
+          type="password"
+          :placeholder="t('lockScreen.setPassword')"
+          size="large"
+          show-password
+        />
+        <el-input
+          v-model="confirmPassword"
+          type="password"
+          :placeholder="t('lockScreen.confirmPassword')"
+          size="large"
+          show-password
+          style="margin-top: 12px"
+        />
+        <el-alert
+          v-if="setPasswordError"
+          :title="setPasswordError"
+          type="error"
+          :closable="false"
+          style="margin-top: 12px"
+        />
+        <div style="margin-top: 16px; display: flex; gap: 12px">
+          <el-button @click="showSetPassword = false">{{ t('common.cancel') }}</el-button>
+          <el-button type="primary" @click="handleSetPassword">
+            {{ t('lockScreen.confirmSet') }}
+          </el-button>
+        </div>
+      </template>
+
+      <!-- 解锁 -->
+      <template v-else>
+        <el-alert v-if="!hasPassword" type="warning" :closable="false" style="margin-bottom: 12px">
+          {{ t('lockScreen.noPassword') }}
+          <el-button type="primary" link size="small" @click="showSetPassword = true">
+            {{ t('lockScreen.setPasswordNow') }}
+          </el-button>
+        </el-alert>
+
         <el-input
           v-model="password"
           type="password"
-          placeholder="输入密码解锁"
+          :placeholder="hasPassword ? t('lockScreen.enterPassword') : t('lockScreen.clickToUnlock')"
           size="large"
           show-password
           @keyup.enter="handleUnlock"
         />
-        <el-button type="primary" size="large" @click="handleUnlock">
-          解锁
+
+        <el-alert
+          v-if="error"
+          :title="t('lockScreen.passwordError')"
+          type="error"
+          :closable="false"
+          style="margin-top: 12px"
+        />
+
+        <el-button
+          type="primary"
+          size="large"
+          style="width: 100%; margin-top: 16px"
+          @click="handleUnlock"
+        >
+          {{ t('lockScreen.unlock') }}
         </el-button>
-      </div>
-      
-      <!-- 错误提示 -->
-      <div v-if="error" class="error">密码错误</div>
+
+        <el-button
+          v-if="hasPassword && isDev"
+          type="warning"
+          link
+          style="margin-top: 12px"
+          @click="handleClearPassword"
+        >
+          {{ t('lockScreen.clearPasswordDev') }}
+        </el-button>
+      </template>
     </div>
   </div>
 </template>
@@ -67,45 +206,81 @@ const handleUnlock = () => {
 <style scoped>
 .lock-screen {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, var(--el-color-primary) 0%, var(--el-color-primary-light-3) 100%);
+  inset: 0;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
 }
 
-.lock-content {
+/* 解锁时立即隐藏，避免 backdrop-filter 等昂贵 CSS 阻塞 */
+.lock-screen.unlocking {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+.lock-screen.unlocking .lock-card {
+  backdrop-filter: none !important;
+}
+
+.lock-card {
+  width: 380px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   text-align: center;
-  color: var(--el-text-color-primary);
+  color: #fff;
 }
 
 .time {
   font-size: 48px;
-  font-weight: 300;
-  margin-bottom: 40px;
+  font-weight: 200;
 }
 
-.avatar { margin-bottom: 16px; }
+.date {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+}
+
+.avatar {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a1a2e;
+  font-size: 24px;
+  font-weight: 600;
+}
 
 .username {
-  font-size: 20px;
-  margin-bottom: 32px;
+  font-size: 16px;
+  margin: 12px 0 20px;
 }
 
-.unlock-form {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
+.lock-card :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
 }
 
-.unlock-form .el-input { width: 200px; }
+.lock-card :deep(.el-input__inner) {
+  color: #fff;
+}
 
-.error {
-  margin-top: 16px;
-  color: var(--el-color-danger);
+.lock-card :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.lock-card :deep(.el-button--primary) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.lock-card :deep(.el-button--primary:hover) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 </style>

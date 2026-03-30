@@ -1,5 +1,10 @@
 import axios from 'axios'
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import type {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig
+} from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
@@ -52,37 +57,43 @@ const HTTP_STATUS: Record<number, string> = {
 
 const logger = {
   enabled: defaultConfig.enableLog,
-  
+
   request(config: InternalAxiosRequestConfig) {
     if (!this.enabled) return
     const method = config.method?.toUpperCase() || 'GET'
     const url = config.url || ''
     const params = config.params || config.data || {}
-    
-    console.group(`%c📤 API Request: ${method} ${url}`, 'color: #42b983; font-weight: bold; font-size: 13px;')
+
+    console.group(
+      `%c📤 API Request: ${method} ${url}`,
+      'color: #42b983; font-weight: bold; font-size: 13px;'
+    )
     console.log('📥 参数:', params)
     console.log('🔗 完整URL:', `${config.baseURL}${url}`)
     console.log('📋 Headers:', config.headers)
     console.groupEnd()
   },
-  
+
   response(response: AxiosResponse) {
     if (!this.enabled) return
     const url = response.config.url || ''
     const startTime = response.config.meta?.requestTime || 0
     const duration = startTime ? Date.now() - startTime : 0
-    
-    console.group(`%c📥 API Response: ${url}`, 'color: #67c23a; font-weight: bold; font-size: 13px;')
+
+    console.group(
+      `%c📥 API Response: ${url}`,
+      'color: #67c23a; font-weight: bold; font-size: 13px;'
+    )
     console.log('📊 状态码:', response.status)
     console.log('📦 返回数据:', response.data)
     console.log('⏱️ 耗时:', `${duration}ms`)
     console.groupEnd()
   },
-  
+
   error(error: any) {
     if (!this.enabled) return
     const url = error.config?.url || 'unknown'
-    
+
     console.group(`%c❌ API Error: ${url}`, 'color: #f56c6c; font-weight: bold; font-size: 13px;')
     console.log('❗ 错误信息:', error.message)
     console.log('📊 状态码:', error.response?.status)
@@ -103,22 +114,22 @@ const service: AxiosInstance = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config) => {
+  config => {
     // 记录请求开始时间
     config.meta = { requestTime: Date.now() }
-    
+
     // 添加 Token
     const { token } = useUserStore()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
+
     // 记录日志
     logger.request(config)
-    
+
     return config
   },
-  (error) => {
+  error => {
     logger.error(error)
     return Promise.reject(error)
   }
@@ -128,27 +139,27 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     logger.response(response)
-    
+
     const { data } = response
-    
+
     // 业务成功
     if (data.code === 200) {
       return data.data as any
     }
-    
+
     // 业务失败
     ElMessage.error(data.message || '请求失败')
     return Promise.reject(new Error(data.message))
   },
-  (error) => {
+  error => {
     logger.error(error)
-    
+
     const { response } = error
-    
+
     // HTTP 错误处理
     if (response) {
       const message = HTTP_STATUS[response.status] || `服务器错误: ${response.status}`
-      
+
       // 401 未授权
       if (response.status === 401) {
         ElMessageBox.confirm('登录已过期，请重新登录', '提示', {
@@ -171,7 +182,7 @@ service.interceptors.response.use(
     } else {
       ElMessage.error('请求失败')
     }
-    
+
     return Promise.reject(error)
   }
 )
@@ -181,16 +192,16 @@ service.interceptors.response.use(
 const request = {
   get: <T = any>(url: string, params?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.get(url, { params, ...config }),
-    
+
   post: <T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.post(url, data, config),
-    
+
   put: <T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.put(url, data, config),
-    
+
   del: <T = any>(url: string, params?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.delete(url, { params, ...config }),
-    
+
   patch: <T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.patch(url, data, config)
 }

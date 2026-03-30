@@ -29,14 +29,11 @@ const showFooter = computed(() => defaultSettings.layout.showFooter)
       <Sidebar />
     </el-aside>
 
-    <el-container 
+    <el-container
       class="layout-main"
       :style="fixedSidebar ? { marginLeft: `${sidebarWidth}px` } : {}"
     >
-      <el-header
-        class="layout-header"
-        :height="themeStore.tabsEnabled ? '80px' : '50px'"
-      >
+      <el-header class="layout-header" :height="themeStore.tabsEnabled ? '80px' : '50px'">
         <Header />
         <Tabs v-if="themeStore.tabsEnabled" />
       </el-header>
@@ -59,17 +56,29 @@ const showFooter = computed(() => defaultSettings.layout.showFooter)
 </template>
 
 <style scoped>
-.layout-container { width: 100%; height: 100vh; overflow: hidden; }
+.layout-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
 
 .layout-sidebar {
   background-color: var(--sidebar-bg);
   border-right: 1px solid var(--el-border-color);
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease;
   overflow: hidden;
   flex-shrink: 0;
 }
 
-.layout-sidebar.is-fixed { position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
+.layout-sidebar.is-fixed {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+}
 
 .layout-main {
   display: flex;
@@ -90,7 +99,11 @@ const showFooter = computed(() => defaultSettings.layout.showFooter)
   z-index: 99;
 }
 
-.layout-content { flex: 1; padding: 16px; overflow: auto; }
+.layout-content {
+  flex: 1;
+  padding: 16px;
+  overflow: auto;
+}
 
 .layout-footer {
   display: flex;
@@ -101,7 +114,18 @@ const showFooter = computed(() => defaultSettings.layout.showFooter)
   font-size: 12px;
 }
 
-.fade-slide-enter-active, .fade-slide-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-.fade-slide-enter-from { opacity: 0; transform: translateX(10px); }
-.fade-slide-leave-to { opacity: 0; transform: translateX(-10px); }
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(10px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
 </style>

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTabsStore } from '@/stores/tabs'
-
 import { useThemeStore } from '@/stores/theme'
 
+const { t } = useI18n()
 const themeStore = useThemeStore()
 const route = useRoute()
 const router = useRouter()
@@ -110,8 +111,11 @@ const refreshPage = () => {
 }
 
 // 点击其他地方关闭菜单
-document.addEventListener('click', () => {
-  closeContextMenu()
+onMounted(() => {
+  document.addEventListener('click', closeContextMenu)
+})
+onUnmounted(() => {
+  document.removeEventListener('click', closeContextMenu)
 })
 </script>
 
@@ -124,17 +128,13 @@ document.addEventListener('click', () => {
           :key="tab.path"
           :class="['tab-item', { 'is-active': activeTab === tab.path }]"
           @click="handleClick(tab.path)"
-          @contextmenu="(e) => handleContextMenu(e, tab.path)"
+          @contextmenu="e => handleContextMenu(e, tab.path)"
         >
           <el-icon v-if="tab.icon && themeStore.tabsShowIcon" class="tab-icon">
             <component :is="tab.icon" />
           </el-icon>
           <span class="tab-title">{{ tab.title }}</span>
-          <el-icon
-            v-if="tabList.length > 1"
-            class="tab-close"
-            @click.stop="handleClose(tab.path)"
-          >
+          <el-icon v-if="tabList.length > 1" class="tab-close" @click.stop="handleClose(tab.path)">
             <Close />
           </el-icon>
         </div>
@@ -150,24 +150,24 @@ document.addEventListener('click', () => {
       >
         <div class="menu-item" @click="refreshPage">
           <el-icon><Refresh /></el-icon>
-          <span>刷新</span>
+          <span>{{ t('common.refresh') }}</span>
         </div>
         <div class="menu-item" @click="closeOther">
           <el-icon><FolderRemove /></el-icon>
-          <span>关闭其他</span>
+          <span>{{ t('tabs.closeOther') }}</span>
         </div>
         <div class="menu-item" @click="closeLeft">
           <el-icon><Back /></el-icon>
-          <span>关闭左侧</span>
+          <span>{{ t('tabs.closeLeft') }}</span>
         </div>
         <div class="menu-item" @click="closeRight">
           <el-icon><Right /></el-icon>
-          <span>关闭右侧</span>
+          <span>{{ t('tabs.closeRight') }}</span>
         </div>
         <div class="menu-divider"></div>
         <div class="menu-item danger" @click="closeAll">
           <el-icon><CircleClose /></el-icon>
-          <span>关闭所有</span>
+          <span>{{ t('tabs.closeAll') }}</span>
         </div>
       </div>
     </Transition>
@@ -180,11 +180,14 @@ document.addEventListener('click', () => {
   align-items: center;
   height: 44px;
   padding: 0 12px;
-  background: var(--tabs-bg);
-  border-top: 1px solid var(--border-color);
+  background: var(--el-bg-color);
+  border-top: 1px solid var(--el-border-color-light);
 }
 
-.tabs-scroll { flex: 1; overflow: hidden; }
+.tabs-scroll {
+  flex: 1;
+  overflow: hidden;
+}
 
 .tabs-wrapper {
   display: flex;
@@ -201,9 +204,9 @@ document.addEventListener('click', () => {
   padding: 0 12px;
   height: 32px;
   border-radius: 4px;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--tabs-text-color);
+  background: var(--el-fill-color-blank);
+  border: 1px solid var(--el-border-color);
+  color: var(--el-text-color-primary);
   font-size: 14px;
   cursor: pointer;
   user-select: none;
@@ -228,7 +231,8 @@ document.addEventListener('click', () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.tab-icon, .tab-title {
+.tab-icon,
+.tab-title {
   font-size: 14px;
   color: inherit;
 }
@@ -246,8 +250,12 @@ document.addEventListener('click', () => {
   transition: background 0.2s;
 }
 
-.tab-close:hover { background: rgba(0, 0, 0, 0.1); }
-.tab-item.is-active .tab-close:hover { background: rgba(255, 255, 255, 0.2); }
+.tab-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+.tab-item.is-active .tab-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 /* 右键菜单 */
 .context-menu {
@@ -255,8 +263,8 @@ document.addEventListener('click', () => {
   z-index: 9999;
   min-width: 120px;
   padding: 4px 0;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-light);
   border-radius: 4px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
 }
@@ -266,7 +274,7 @@ document.addEventListener('click', () => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  color: var(--text-color-primary);
+  color: var(--el-text-color-primary);
   cursor: pointer;
   transition: background 0.2s;
 }
@@ -281,9 +289,22 @@ document.addEventListener('click', () => {
   color: var(--el-color-danger);
 }
 
-.menu-item .el-icon { font-size: 14px; color: inherit; }
-.menu-divider { height: 1px; margin: 4px 0; background: var(--border-color); }
+.menu-item .el-icon {
+  font-size: 14px;
+  color: inherit;
+}
+.menu-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--el-border-color-lighter);
+}
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.15s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

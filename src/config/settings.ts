@@ -4,7 +4,7 @@
 
 export default {
   title: 'Aohoyo Admin',
-  logo: '/logo.svg',
+  logo: '/logo.png',
   baseUrl: import.meta.env.VITE_APP_BASE_API || '/api',
 
   // 标签页
@@ -26,10 +26,11 @@ export default {
 
   // 功能开关
   features: {
-    fullscreen: true,    // 全屏按钮
-    lockScreen: true,     // 锁屏功能
-    notification: true,   // 通知功能
-    refresh: true         // 刷新按钮
+    fullscreen: true, // 全屏按钮
+    lockScreen: true, // 锁屏功能
+    notification: true, // 通知功能
+    refresh: true, // 刷新按钮
+    language: true // 语言切换按钮
   },
 
   // 主题

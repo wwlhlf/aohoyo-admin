@@ -8,7 +8,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('@/views/login/index.vue'),
     meta: {
-      title: '登录',
+      title: 'login.title',
       hidden: true
     }
   },
@@ -30,7 +30,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/dashboard',
     meta: {
-      title: '首页',
+      title: 'nav.dashboard',
       icon: 'HomeFilled'
     },
     children: [
@@ -39,7 +39,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index.vue'),
         meta: {
-          title: '仪表盘',
+          title: 'nav.dashboard',
           icon: 'Monitor'
         }
       },
@@ -48,7 +48,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'Profile',
         component: () => import('@/views/profile/index.vue'),
         meta: {
-          title: '个人中心',
+          title: 'nav.profile',
           icon: 'User',
           hidden: true
         }
@@ -60,7 +60,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/system/user',
     meta: {
-      title: '系统管理',
+      title: 'nav.system',
       icon: 'Setting'
     },
     children: [
@@ -69,7 +69,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'User',
         component: () => import('@/views/system/user/index.vue'),
         meta: {
-          title: '用户管理',
+          title: 'nav.user',
           icon: 'User'
         }
       },
@@ -78,7 +78,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'Role',
         component: () => import('@/views/system/role/index.vue'),
         meta: {
-          title: '角色管理',
+          title: 'nav.role',
           icon: 'UserFilled'
         }
       },
@@ -87,7 +87,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'Menu',
         component: () => import('@/views/system/menu/index.vue'),
         meta: {
-          title: '菜单管理',
+          title: 'nav.menu',
           icon: 'Menu'
         }
       }
@@ -98,7 +98,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/example/table',
     meta: {
-      title: '示例页面',
+      title: 'nav.example',
       icon: 'Document'
     },
     children: [
@@ -107,7 +107,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'TableExample',
         component: () => import('@/views/example/table/index.vue'),
         meta: {
-          title: '表格示例',
+          title: 'nav.table',
           icon: 'Grid'
         }
       },
@@ -116,7 +116,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'FormExample',
         component: () => import('@/views/example/form/index.vue'),
         meta: {
-          title: '表单示例',
+          title: 'nav.form',
           icon: 'EditPen'
         }
       }

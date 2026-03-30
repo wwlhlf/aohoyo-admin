@@ -64,7 +64,7 @@ const passwordRules: FormRules = {
 // 保存个人信息
 const handleSaveProfile = async () => {
   if (!profileFormRef.value) return
-  await profileFormRef.value.validate((valid) => {
+  await profileFormRef.value.validate(valid => {
     if (valid) {
       userStore.setUserInfo({
         ...userInfo.value,
@@ -78,7 +78,7 @@ const handleSaveProfile = async () => {
 // 修改密码
 const handleChangePassword = async () => {
   if (!passwordFormRef.value) return
-  await passwordFormRef.value.validate((valid) => {
+  await passwordFormRef.value.validate(valid => {
     if (valid) {
       ElMessage.success('密码修改成功')
       passwordFormRef.value?.resetFields()
@@ -99,7 +99,13 @@ const handleChangePassword = async () => {
             </el-avatar>
             <h3 class="username">{{ userInfo?.nickname || '用户' }}</h3>
             <p class="role">
-              <el-tag v-for="role in userInfo?.roles" :key="role" size="small" type="primary" effect="dark">
+              <el-tag
+                v-for="role in userInfo?.roles"
+                :key="role"
+                size="small"
+                type="primary"
+                effect="dark"
+              >
                 {{ role }}
               </el-tag>
             </p>

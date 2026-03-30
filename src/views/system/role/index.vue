@@ -5,9 +5,33 @@ import type { FormInstance, FormRules } from 'element-plus'
 
 // 表格数据
 const tableData = ref([
-  { id: 1, name: '超级管理员', code: 'admin', description: '拥有所有权限', status: 1, permissions: ['*'], createTime: '2026-01-01 00:00:00' },
-  { id: 2, name: '普通用户', code: 'user', description: '普通用户权限', status: 1, permissions: ['dashboard:view', 'profile:view'], createTime: '2026-01-01 00:00:00' },
-  { id: 3, name: '编辑员', code: 'editor', description: '内容编辑权限', status: 1, permissions: ['dashboard:view', 'content:view', 'content:edit'], createTime: '2026-02-01 00:00:00' }
+  {
+    id: 1,
+    name: '超级管理员',
+    code: 'admin',
+    description: '拥有所有权限',
+    status: 1,
+    permissions: ['*'],
+    createTime: '2026-01-01 00:00:00'
+  },
+  {
+    id: 2,
+    name: '普通用户',
+    code: 'user',
+    description: '普通用户权限',
+    status: 1,
+    permissions: ['dashboard:view', 'profile:view'],
+    createTime: '2026-01-01 00:00:00'
+  },
+  {
+    id: 3,
+    name: '编辑员',
+    code: 'editor',
+    description: '内容编辑权限',
+    status: 1,
+    permissions: ['dashboard:view', 'content:view', 'content:edit'],
+    createTime: '2026-02-01 00:00:00'
+  }
 ])
 
 const loading = ref(false)
@@ -32,36 +56,52 @@ const permissionTree = [
     id: 'system',
     label: '系统管理',
     children: [
-      { id: 'user', label: '用户管理', children: [
-        { id: 'user:view', label: '查看' },
-        { id: 'user:create', label: '新增' },
-        { id: 'user:edit', label: '编辑' },
-        { id: 'user:delete', label: '删除' }
-      ]},
-      { id: 'role', label: '角色管理', children: [
-        { id: 'role:view', label: '查看' },
-        { id: 'role:create', label: '新增' },
-        { id: 'role:edit', label: '编辑' },
-        { id: 'role:delete', label: '删除' }
-      ]},
-      { id: 'menu', label: '菜单管理', children: [
-        { id: 'menu:view', label: '查看' },
-        { id: 'menu:create', label: '新增' },
-        { id: 'menu:edit', label: '编辑' },
-        { id: 'menu:delete', label: '删除' }
-      ]}
+      {
+        id: 'user',
+        label: '用户管理',
+        children: [
+          { id: 'user:view', label: '查看' },
+          { id: 'user:create', label: '新增' },
+          { id: 'user:edit', label: '编辑' },
+          { id: 'user:delete', label: '删除' }
+        ]
+      },
+      {
+        id: 'role',
+        label: '角色管理',
+        children: [
+          { id: 'role:view', label: '查看' },
+          { id: 'role:create', label: '新增' },
+          { id: 'role:edit', label: '编辑' },
+          { id: 'role:delete', label: '删除' }
+        ]
+      },
+      {
+        id: 'menu',
+        label: '菜单管理',
+        children: [
+          { id: 'menu:view', label: '查看' },
+          { id: 'menu:create', label: '新增' },
+          { id: 'menu:edit', label: '编辑' },
+          { id: 'menu:delete', label: '删除' }
+        ]
+      }
     ]
   },
   {
     id: 'content',
     label: '内容管理',
     children: [
-      { id: 'article', label: '文章管理', children: [
-        { id: 'content:view', label: '查看' },
-        { id: 'content:create', label: '新增' },
-        { id: 'content:edit', label: '编辑' },
-        { id: 'content:delete', label: '删除' }
-      ]}
+      {
+        id: 'article',
+        label: '文章管理',
+        children: [
+          { id: 'content:view', label: '查看' },
+          { id: 'content:create', label: '新增' },
+          { id: 'content:edit', label: '编辑' },
+          { id: 'content:delete', label: '删除' }
+        ]
+      }
     ]
   },
   {
@@ -142,7 +182,7 @@ const handleDelete = (row: any) => {
 // 提交
 const handleSubmit = async () => {
   if (!formRef.value) return
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(valid => {
     if (valid) {
       // 获取选中的权限
       if (treeRef.value) {
@@ -199,7 +239,7 @@ onMounted(() => {
       </div>
 
       <!-- 表格 -->
-      <el-table :data="tableData" v-loading="loading" stripe border>
+      <el-table v-loading="loading" :data="tableData" stripe border>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="角色名称" width="150" />
         <el-table-column prop="code" label="角色编码" width="120" />
@@ -243,12 +283,21 @@ onMounted(() => {
           </el-col>
           <el-col :span="12">
             <el-form-item label="角色编码" prop="code">
-              <el-input v-model="formData.code" placeholder="请输入角色编码" :disabled="formData.id > 0" />
+              <el-input
+                v-model="formData.code"
+                placeholder="请输入角色编码"
+                :disabled="formData.id > 0"
+              />
             </el-form-item>
           </el-col>
         </el-row>
         <el-form-item label="描述">
-          <el-input v-model="formData.description" type="textarea" :rows="2" placeholder="请输入描述" />
+          <el-input
+            v-model="formData.description"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入描述"
+          />
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="formData.status">

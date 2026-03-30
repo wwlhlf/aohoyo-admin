@@ -1,6 +1,6 @@
 /**
  * 工具函数库
- * 
+ *
  * 包含：深拷贝、防抖节流、URL处理、文件下载、剪贴板等
  */
 
@@ -11,10 +11,10 @@ export function deepClone<T>(obj: T): T {
   if (!obj || typeof obj !== 'object') return obj
   if (obj instanceof Date) return new Date(obj.getTime()) as T
   if (Array.isArray(obj)) return obj.map(deepClone) as T
-  
+
   const copy = {} as T
   Object.keys(obj).forEach(key => {
-    (copy as any)[key] = deepClone((obj as any)[key])
+    ;(copy as any)[key] = deepClone((obj as any)[key])
   })
   return copy
 }
@@ -33,7 +33,7 @@ export function isEmpty(val: any): boolean {
 /** 防抖 */
 export function debounce<T extends (...args: any[]) => any>(fn: T, delay = 300) {
   let timer: ReturnType<typeof setTimeout>
-  return function(this: any, ...args: Parameters<T>) {
+  return function (this: any, ...args: Parameters<T>) {
     clearTimeout(timer)
     timer = setTimeout(() => fn.apply(this, args), delay)
   }
@@ -42,7 +42,7 @@ export function debounce<T extends (...args: any[]) => any>(fn: T, delay = 300) 
 /** 节流 */
 export function throttle<T extends (...args: any[]) => any>(fn: T, delay = 300) {
   let last = 0
-  return function(this: any, ...args: Parameters<T>) {
+  return function (this: any, ...args: Parameters<T>) {
     const now = Date.now()
     if (now - last >= delay) {
       last = now
@@ -64,10 +64,14 @@ export function objectToQuery(obj: Record<string, any>): string {
 /** 查询字符串转对象 */
 export function queryToObject(query: string): Record<string, string> {
   return Object.fromEntries(
-    query.replace(/^\?/, '').split('&').filter(Boolean).map(p => {
-      const [k, v = ''] = p.split('=')
-      return [decodeURIComponent(k), decodeURIComponent(v)]
-    })
+    query
+      .replace(/^\?/, '')
+      .split('&')
+      .filter(Boolean)
+      .map(p => {
+        const [k, v = ''] = p.split('=')
+        return [decodeURIComponent(k), decodeURIComponent(v)]
+      })
   )
 }
 
@@ -104,13 +108,13 @@ export function formatFileSize(bytes: number): string {
 /** 生成 UUID */
 export function uuid(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0
-    return (c === 'x' ? r : r & 3 | 8).toString(16)
+    const r = (Math.random() * 16) | 0
+    return (c === 'x' ? r : (r & 3) | 8).toString(16)
   })
 }
 
 /** 随机字符串 */
 export function randomStr(len = 16): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  return Array.from({ length: len }, () => chars[Math.random() * chars.length | 0]).join('')
+  return Array.from({ length: len }, () => chars[(Math.random() * chars.length) | 0]).join('')
 }

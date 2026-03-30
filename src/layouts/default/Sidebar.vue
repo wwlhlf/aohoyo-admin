@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import defaultSettings from '@/config/settings'
 import type { RouteRecordRaw } from 'vue-router'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
@@ -86,31 +88,39 @@ const toggleCollapse = () => {
           <el-sub-menu v-if="item.children && item.children.length > 0" :index="item.path">
             <template #title>
               <el-icon v-if="item.meta?.icon"><component :is="item.meta.icon" /></el-icon>
-              <span>{{ item.meta?.title }}</span>
+              <span>{{ t(item.meta?.title as string) }}</span>
             </template>
-            
+
             <!-- 二级菜单 -->
             <template v-for="child in item.children" :key="child.path">
               <!-- 三级菜单 -->
-              <el-sub-menu v-if="child.children && child.children.length > 0" :index="`${item.path}/${child.path}`">
+              <el-sub-menu
+                v-if="child.children && child.children.length > 0"
+                :index="`${item.path}/${child.path}`"
+              >
                 <template #title>
                   <el-icon v-if="child.meta?.icon"><component :is="child.meta.icon" /></el-icon>
-                  <span>{{ child.meta?.title }}</span>
+                  <span>{{ t(child.meta?.title as string) }}</span>
                 </template>
                 <el-menu-item
                   v-for="subChild in child.children"
                   :key="subChild.path"
                   :index="`${item.path}/${child.path}/${subChild.path}`"
                 >
-                  <el-icon v-if="subChild.meta?.icon"><component :is="subChild.meta.icon" /></el-icon>
-                  <span>{{ subChild.meta?.title }}</span>
+                  <el-icon v-if="subChild.meta?.icon">
+                    <component :is="subChild.meta.icon" />
+                  </el-icon>
+                  <span>{{ t(subChild.meta?.title as string) }}</span>
                 </el-menu-item>
               </el-sub-menu>
-              
+
               <!-- 普通二级菜单 -->
-              <el-menu-item v-else :index="item.path === '/' ? `/${child.path}` : `${item.path}/${child.path}`">
+              <el-menu-item
+                v-else
+                :index="item.path === '/' ? `/${child.path}` : `${item.path}/${child.path}`"
+              >
                 <el-icon v-if="child.meta?.icon"><component :is="child.meta.icon" /></el-icon>
-                <template #title>{{ child.meta?.title }}</template>
+                <template #title>{{ t(child.meta?.title as string) }}</template>
               </el-menu-item>
             </template>
           </el-sub-menu>
@@ -118,7 +128,7 @@ const toggleCollapse = () => {
           <!-- 无子菜单 -->
           <el-menu-item v-else :index="item.redirect || item.path">
             <el-icon v-if="item.meta?.icon"><component :is="item.meta.icon" /></el-icon>
-            <template #title>{{ item.meta?.title }}</template>
+            <template #title>{{ t(item.meta?.title as string) }}</template>
           </el-menu-item>
         </template>
       </el-menu>
@@ -151,9 +161,15 @@ const toggleCollapse = () => {
   transition: background 0.3s;
 }
 
-.sidebar-logo:hover { background: var(--sidebar-hover-bg); }
+.sidebar-logo:hover {
+  background: var(--sidebar-hover-bg);
+}
 
-.logo-img { width: 32px; height: 32px; flex-shrink: 0; }
+.logo-img {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
 
 .logo-text {
   margin-left: 12px;
@@ -162,7 +178,10 @@ const toggleCollapse = () => {
   color: var(--sidebar-text-color);
 }
 
-.sidebar-menu-wrapper { flex: 1; overflow: hidden; }
+.sidebar-menu-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
 
 .sidebar-menu-wrapper :deep(.el-menu) {
   border-right: none;
@@ -188,7 +207,9 @@ const toggleCollapse = () => {
   border-right: 3px solid var(--el-color-primary);
 }
 
-.sidebar-menu-wrapper :deep(.el-sub-menu .el-menu-item) { padding-left: 50px !important; }
+.sidebar-menu-wrapper :deep(.el-sub-menu .el-menu-item) {
+  padding-left: 50px !important;
+}
 
 .sidebar-collapse-btn {
   display: flex;

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import UnoCSS from 'unocss/vite'
 import { viteMockServe } from 'vite-plugin-mock'
 import { resolve } from 'path'
 
@@ -8,35 +7,35 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [
     vue(),
-    UnoCSS(),
     viteMockServe({
       mockPath: 'mock',
-      enable: true,
-    }),
+      enable: process.env.NODE_ENV === 'development' // 只在开发环境启用
+    })
   ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-    },
+      '@': resolve(__dirname, 'src')
+    }
   },
   server: {
     host: '0.0.0.0',
     port: 33520,
+    allowedHosts: ['nas.banayou.com', 'localhost'],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
+        rewrite: path => path.replace(/^\/api/, '')
+      }
+    }
   },
   build: {
     rollupOptions: {
       output: {
         chunkFileNames: 'static/js/[name]-[hash].js',
         entryFileNames: 'static/js/[name]-[hash].js',
-        assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
-      },
-    },
-  },
+        assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
+      }
+    }
+  }
 })

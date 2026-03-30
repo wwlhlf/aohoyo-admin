@@ -2,7 +2,10 @@ import type { MockMethod } from 'vite-plugin-mock'
 
 // Mock 日志
 const mockLog = (method: string, url: string, params: any, response: any) => {
-  console.group(`%c🎭 Mock Request: ${method} ${url}`, 'color: #9c27b0; font-weight: bold; font-size: 13px;')
+  console.group(
+    `%c🎭 Mock Request: ${method} ${url}`,
+    'color: #9c27b0; font-weight: bold; font-size: 13px;'
+  )
   console.log('📥 参数:', params)
   console.log('📦 返回:', response)
   console.groupEnd()

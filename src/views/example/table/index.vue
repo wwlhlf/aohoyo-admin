@@ -1,4 +1,5 @@
 <script setup lang="ts">
+defineOptions({ name: 'TableExample' })
 import { ref } from 'vue'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 

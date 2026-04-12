@@ -169,14 +169,14 @@ const handleAdd = (parentId: number = 0) => {
 }
 
 // 编辑
-const handleEdit = (row: any) => {
+const handleEdit = (row: typeof formData) => {
   dialogTitle.value = '编辑菜单'
-  Object.assign(formData, row)
+  Object.assign(formData, JSON.parse(JSON.stringify(row)))
   dialogVisible.value = true
 }
 
 // 删除
-const handleDelete = (row: any) => {
+const handleDelete = (row: typeof formData) => {
   ElMessageBox.confirm(`确定要删除菜单「${row.name}」吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+defineOptions({ name: 'Dashboard' })
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import { useResponsive } from '@/composables/useResponsive'

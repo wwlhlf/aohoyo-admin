@@ -70,11 +70,11 @@ const username = computed(
 const hasPassword = computed(() => !!themeStore.lockPassword)
 
 // 解锁：本地验证 → 禁用 CSS → nextTick 更新 store
-const handleUnlock = () => {
+const handleUnlock = async () => {
   const pwd = password.value
 
   // 使用 store 验证密码
-  if (!themeStore.unlock(pwd)) {
+  if (!(await themeStore.unlock(pwd))) {
     error.value = true
     setTimeout(() => (error.value = false), 2000)
     return
@@ -88,7 +88,7 @@ const handleUnlock = () => {
 }
 
 // 设置密码
-const handleSetPassword = () => {
+const handleSetPassword = async () => {
   if (newPassword.value.length < 4) {
     setPasswordError.value = t('lockScreen.passwordMinLength')
     return
@@ -98,7 +98,7 @@ const handleSetPassword = () => {
     return
   }
 
-  themeStore.setLockPassword(newPassword.value)
+  await themeStore.setLockPassword(newPassword.value)
   newPassword.value = ''
   confirmPassword.value = ''
   setPasswordError.value = ''

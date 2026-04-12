@@ -1,4 +1,5 @@
 <script setup lang="ts">
+defineOptions({ name: 'Profile' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'

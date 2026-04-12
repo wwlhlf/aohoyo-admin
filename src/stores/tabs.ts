@@ -46,17 +46,24 @@ export const useTabsStore = defineStore('tabs', {
         }
         this.tabList.push(migratedTab)
       }
+      // 同步缓存组件名（用于 keep-alive）
+      if (tab.name && !this.cachedViews.includes(tab.name)) {
+        this.cachedViews.push(tab.name)
+      }
     },
 
     // 移除标签
     removeTab(path: string) {
       const index = this.tabList.findIndex(item => item.path === path)
       if (index > -1) {
+        const removed = this.tabList[index]
         this.tabList.splice(index, 1)
         // 同步移除缓存
-        const cachedIndex = this.cachedViews.indexOf(path)
-        if (cachedIndex > -1) {
-          this.cachedViews.splice(cachedIndex, 1)
+        if (removed.name) {
+          const cachedIndex = this.cachedViews.indexOf(removed.name)
+          if (cachedIndex > -1) {
+            this.cachedViews.splice(cachedIndex, 1)
+          }
         }
       }
     },
@@ -64,7 +71,9 @@ export const useTabsStore = defineStore('tabs', {
     // 关闭其他标签
     closeOtherTabs(path: string) {
       this.tabList = this.tabList.filter(item => item.path === path)
-      this.cachedViews = this.cachedViews.filter(view => view === path)
+      this.cachedViews = this.tabList
+        .map(tab => tab.name)
+        .filter((name): name is string => !!name)
     },
 
     // 关闭左侧标签
@@ -72,9 +81,9 @@ export const useTabsStore = defineStore('tabs', {
       const index = this.tabList.findIndex(item => item.path === path)
       if (index > -1) {
         this.tabList = this.tabList.slice(index)
-        this.cachedViews = this.cachedViews.filter(view =>
-          this.tabList.some(tab => tab.path === view)
-        )
+        this.cachedViews = this.tabList
+          .map(tab => tab.name)
+          .filter((name): name is string => !!name)
       }
     },
 
@@ -83,9 +92,9 @@ export const useTabsStore = defineStore('tabs', {
       const index = this.tabList.findIndex(item => item.path === path)
       if (index > -1) {
         this.tabList = this.tabList.slice(0, index + 1)
-        this.cachedViews = this.cachedViews.filter(view =>
-          this.tabList.some(tab => tab.path === view)
-        )
+        this.cachedViews = this.tabList
+          .map(tab => tab.name)
+          .filter((name): name is string => !!name)
       }
     },
 

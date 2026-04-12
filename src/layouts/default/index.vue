@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
+import { useTabsStore } from '@/stores/tabs'
 import Sidebar from './Sidebar.vue'
 import Header from './Header.vue'
 import Tabs from './Tabs.vue'
@@ -9,8 +10,10 @@ import defaultSettings from '@/config/settings'
 
 const appStore = useAppStore()
 const themeStore = useThemeStore()
+const tabsStore = useTabsStore()
 
 const isMobile = computed(() => appStore.device === 'mobile')
+const cachedViews = computed(() => tabsStore.cachedViews)
 
 const sidebarWidth = computed(() =>
   appStore.sidebarCollapsed
@@ -93,7 +96,7 @@ onUnmounted(() => {
       <el-main :class="['layout-content', { 'is-mobile': isMobile }]">
         <router-view v-slot="{ Component, route }">
           <transition :name="themeStore.animation ? 'fade-slide' : ''" mode="out-in">
-            <keep-alive :include="[]">
+            <keep-alive :include="cachedViews">
               <component :is="Component" :key="route.path" />
             </keep-alive>
           </transition>

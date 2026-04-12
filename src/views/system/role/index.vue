@@ -158,7 +158,7 @@ const handleAdd = () => {
 }
 
 // 编辑（包含权限设置）
-const handleEdit = (row: any) => {
+const handleEdit = (row: typeof formData) => {
   dialogTitle.value = '编辑角色'
   Object.assign(formData, {
     ...row,
@@ -174,7 +174,7 @@ const handleEdit = (row: any) => {
 }
 
 // 删除
-const handleDelete = (row: any) => {
+const handleDelete = (row: typeof formData) => {
   ElMessageBox.confirm(`确定要删除角色「${row.name}」吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',

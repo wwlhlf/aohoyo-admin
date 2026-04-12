@@ -107,7 +107,7 @@ export const useThemeStore = defineStore('theme', {
     lock() {
       this.isLocked = true
     },
-    unlock(password: string): boolean {
+    async unlock(password: string): Promise<boolean> {
       // 未设置密码，直接解锁
       if (!this.lockPassword) {
         this.$patch({ isLocked: false })
@@ -115,15 +115,15 @@ export const useThemeStore = defineStore('theme', {
       }
 
       // 验证密码
-      const storedPassword = decode(this.lockPassword)
+      const storedPassword = await decode(this.lockPassword)
       if (storedPassword === password) {
         this.$patch({ isLocked: false })
         return true
       }
       return false
     },
-    setLockPassword(password: string) {
-      this.lockPassword = encode(password)
+    async setLockPassword(password: string) {
+      this.lockPassword = await encode(password)
     },
     // 清除锁屏密码
     clearLockPassword() {

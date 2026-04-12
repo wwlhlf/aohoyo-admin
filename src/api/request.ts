@@ -90,7 +90,7 @@ const logger = {
     console.groupEnd()
   },
 
-  error(error: any) {
+  error(error: unknown) {
     if (!this.enabled) return
     const url = error.config?.url || 'unknown'
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+defineOptions({ name: 'FormExample' })
 import { reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'

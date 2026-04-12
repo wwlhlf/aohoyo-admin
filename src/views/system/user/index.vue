@@ -122,14 +122,14 @@ const handleAdd = () => {
 }
 
 // 编辑
-const handleEdit = (row: any) => {
+const handleEdit = (row: typeof formData) => {
   dialogTitle.value = '编辑用户'
-  Object.assign(formData, row)
+  Object.assign(formData, JSON.parse(JSON.stringify(row)))
   dialogVisible.value = true
 }
 
 // 删除
-const handleDelete = (row: any) => {
+const handleDelete = (row: typeof formData) => {
   ElMessageBox.confirm(`确定要删除用户「${row.nickname}」吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -164,7 +164,7 @@ const resetForm = () => {
 }
 
 // 状态切换
-const handleStatusChange = (row: any) => {
+const handleStatusChange = (row: typeof formData) => {
   const text = row.status === 1 ? '启用' : '禁用'
   ElMessage.success(`已${text}用户「${row.nickname}」`)
 }

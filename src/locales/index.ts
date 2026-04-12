@@ -2,6 +2,8 @@ import { createI18n } from 'vue-i18n'
 import zhCN from './zh-CN'
 import enUS from './en-US'
 
+type AppLocale = 'zh-CN' | 'en-US'
+
 // 获取存储的语言或浏览器语言
 function getLocale(): string {
   const stored = localStorage.getItem('locale')
@@ -25,7 +27,7 @@ const i18n = createI18n({
 
 // 切换语言
 export function setLocale(locale: string): void {
-  i18n.global.locale.value = locale as any
+  i18n.global.locale.value = locale as AppLocale
   localStorage.setItem('locale', locale)
   document.documentElement.setAttribute('lang', locale)
 }

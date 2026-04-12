@@ -72,8 +72,7 @@ export const useUserStore = defineStore('user', {
 
     // 退出登录 / 重置
     logout() {
-      this.token = ''
-      this.userInfo = {}
+      this.$reset()
     }
   },
 

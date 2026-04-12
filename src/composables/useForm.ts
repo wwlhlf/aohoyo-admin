@@ -3,20 +3,20 @@ import type { FormInstance } from 'element-plus'
 
 interface FormOptions {
   // 默认值
-  defaultValue?: Record<string, any>
+  defaultValue?: Record<string, unknown>
   // 提交方法
-  submitFn?: (data: Record<string, any>) => Promise<any>
+  submitFn?: (data: Record<string, unknown>) => Promise<unknown>
 }
 
 interface FormState {
   formRef: ReturnType<typeof ref<FormInstance | undefined>>
-  formData: Record<string, any>
+  formData: Record<string, unknown>
   loading: ReturnType<typeof ref<boolean>>
   // 方法
   validate: () => Promise<boolean>
   reset: () => void
   submit: () => Promise<boolean>
-  setFormData: (data: Record<string, any>) => void
+  setFormData: (data: Record<string, unknown>) => void
 }
 
 /**
@@ -29,7 +29,7 @@ export function useForm(options: FormOptions): FormState {
   const formRef = ref<FormInstance>()
 
   // 表单数据
-  const formData = reactive<Record<string, any>>({ ...defaultValue })
+  const formData = reactive<Record<string, unknown>>({ ...defaultValue })
 
   // 加载状态
   const loading = ref(false)
@@ -78,7 +78,7 @@ export function useForm(options: FormOptions): FormState {
   }
 
   // 设置表单数据
-  const setFormData = (data: Record<string, any>) => {
+  const setFormData = (data: Record<string, unknown>) => {
     Object.assign(formData, data)
   }
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+defineOptions({ name: 'Menu' })
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -118,17 +119,24 @@ const menuTypes = [
 ]
 
 // 扁平化菜单列表（用于选择父级）
+interface FlatMenuRow {
+  id: number
+  name: string
+  level?: number
+  [key: string]: unknown
+}
 const flatMenuList = computed(() => {
-  const result: any[] = [{ id: 0, name: '顶级菜单' }]
-  const flatten = (list: any[], level = 0) => {
+  const result: FlatMenuRow[] = [{ id: 0, name: '顶级菜单' }]
+  const flatten = (list: FlatMenuRow[], level = 0) => {
     list.forEach(item => {
       result.push({ ...item, level })
-      if (item.children?.length) {
-        flatten(item.children, level + 1)
+      const children = item.children as FlatMenuRow[] | undefined
+      if (children?.length) {
+        flatten(children, level + 1)
       }
     })
   }
-  flatten(tableData.value)
+  flatten(tableData.value as unknown as FlatMenuRow[], 0)
   return result
 })
 

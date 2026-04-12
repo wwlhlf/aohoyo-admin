@@ -39,7 +39,9 @@ export function setupRouterGuards(router: Router) {
         next()
       } else {
         // 不在白名单，重定向到登录页
-        next({ path: '/login', query: { redirect: to.fullPath } })
+        // 防止 redirect 指向自身导致循环
+        const redirect = to.path === '/login' ? undefined : to.fullPath
+        next({ path: '/login', ...(redirect ? { query: { redirect } } : {}) })
       }
     }
   })

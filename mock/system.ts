@@ -1,7 +1,7 @@
 import type { MockMethod } from 'vite-plugin-mock'
 
 // Mock 日志
-const mockLog = (method: string, url: string, params: any, response: any) => {
+const mockLog = (method: string, url: string, params: unknown, response: unknown) => {
   console.group(
     `%c🎭 Mock Request: ${method} ${url}`,
     'color: #9c27b0; font-weight: bold; font-size: 13px;'

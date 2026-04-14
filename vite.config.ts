@@ -1,12 +1,14 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { viteMockServe } from 'vite-plugin-mock'
+import Icons from 'unplugin-icons/vite'
 import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    Icons({ autoInstall: true }),
     viteMockServe({
       mockPath: 'mock',
       enable: process.env.NODE_ENV === 'development' // 只在开发环境启用
@@ -19,7 +21,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 33520,
+    port: 3000,
     allowedHosts: ['nas.banayou.com', 'localhost'],
     proxy: {
       '/api': {

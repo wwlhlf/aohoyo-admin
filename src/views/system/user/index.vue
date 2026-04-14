@@ -1,68 +1,40 @@
 <script setup lang="ts">
 defineOptions({ name: 'User' })
-import { ref, reactive, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useResponsive } from '@/composables/useResponsive'
+import { useTable } from '@/composables/useTable'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import ResponsiveDialog from '@/components/ResponsiveDialog/index.vue'
 import ResponsiveSearch from '@/components/ResponsiveSearch/index.vue'
+import { getUserList } from '@/api/modules/system'
 
 const { paginationLayout, paginationSmall } = useResponsive()
 
-// 表格数据
-const tableData = ref([
-  {
-    id: 1,
-    username: 'admin',
-    nickname: '超级管理员',
-    email: 'admin@aohoyo.com',
-    phone: '13800138000',
-    status: 1,
-    roles: ['admin'],
-    createTime: '2026-01-01 00:00:00'
-  },
-  {
-    id: 2,
-    username: 'zhangsan',
-    nickname: '张三',
-    email: 'zhangsan@aohoyo.com',
-    phone: '13800138001',
-    status: 1,
-    roles: ['user'],
-    createTime: '2026-02-01 10:00:00'
-  },
-  {
-    id: 3,
-    username: 'lisi',
-    nickname: '李四',
-    email: 'lisi@aohoyo.com',
-    phone: '13800138002',
-    status: 1,
-    roles: ['user'],
-    createTime: '2026-02-15 14:30:00'
-  },
-  {
-    id: 4,
-    username: 'wangwu',
-    nickname: '王五',
-    email: 'wangwu@aohoyo.com',
-    phone: '13800138003',
-    status: 0,
-    roles: ['user'],
-    createTime: '2026-03-01 09:00:00'
-  }
-])
-
-const loading = ref(false)
-const total = ref(4)
-
-// 查询参数
-const queryParams = reactive({
-  page: 1,
-  pageSize: 10,
-  keyword: ''
+// 表格数据（useTable 管理）
+const {
+  loading,
+  data: tableData,
+  pagination,
+  handleSearch,
+  refresh
+} = useTable({
+  fetchFn: params => getUserList(params as { page: number; pageSize: number; keyword?: string }),
+  defaultParams: { keyword: '' }
 })
+
+// 搜索参数
+const searchKeyword = ref('')
+
+const onSearch = () => {
+  handleSearch({ keyword: searchKeyword.value })
+}
+
+const onReset = () => {
+  searchKeyword.value = ''
+  handleSearch({ keyword: '' })
+}
 
 // 弹窗相关
 const dialogVisible = ref(false)
@@ -101,20 +73,6 @@ const rules: FormRules = {
   ]
 }
 
-// 搜索
-const handleSearch = () => {
-  queryParams.page = 1
-  loadData()
-}
-
-// 加载数据
-const loadData = () => {
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
-}
-
 // 新增
 const handleAdd = () => {
   dialogTitle.value = '新增用户'
@@ -135,10 +93,12 @@ const handleDelete = (row: typeof formData) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-    loadData()
-  }).catch(() => {})
+  })
+    .then(() => {
+      ElMessage.success('删除成功')
+      refresh()
+    })
+    .catch(() => {})
 }
 
 // 提交
@@ -150,7 +110,7 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     ElMessage.success(formData.id ? '修改成功' : '新增成功')
     dialogVisible.value = false
-    loadData()
+    refresh()
   } catch {
     // 验证失败
   } finally {
@@ -174,10 +134,6 @@ const handleStatusChange = (row: typeof formData) => {
   const text = row.status === 1 ? '启用' : '禁用'
   ElMessage.success(`已${text}用户「${row.nickname}」`)
 }
-
-onMounted(() => {
-  loadData()
-})
 </script>
 
 <template>
@@ -187,13 +143,14 @@ onMounted(() => {
       <template #header>
         <ResponsiveSearch>
           <el-input
-            v-model="queryParams.keyword"
+            v-model="searchKeyword"
             placeholder="搜索用户名/昵称"
             style="width: 200px"
             clearable
-            @keyup.enter="handleSearch"
+            @keyup.enter="onSearch"
           />
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button type="primary" @click="onSearch">搜索</el-button>
+          <el-button @click="onReset">重置</el-button>
           <template #actions>
             <el-button v-permission="'user:create'" type="primary" @click="handleAdd">
               <el-icon><Plus /></el-icon>
@@ -258,9 +215,9 @@ onMounted(() => {
       <!-- 分页 -->
       <div class="pagination-wrapper">
         <el-pagination
-          v-model:current-page="queryParams.page"
-          v-model:page-size="queryParams.pageSize"
-          :total="total"
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.pageSize"
+          :total="pagination.total"
           :page-sizes="[10, 20, 50, 100]"
           :layout="paginationLayout"
           :small="paginationSmall"
@@ -269,17 +226,8 @@ onMounted(() => {
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <ResponsiveDialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      desktop-width="500px"
-    >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="rules"
-        label-width="80px"
-      >
+    <ResponsiveDialog v-model="dialogVisible" :title="dialogTitle" desktop-width="500px">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="formData.username" placeholder="请输入用户名" />
         </el-form-item>

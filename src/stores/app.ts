@@ -19,12 +19,7 @@ export const useAppStore = defineStore('app', {
   actions: {
     // 切换侧边栏
     toggleSidebar() {
-      if (this.device === 'mobile') {
-        // 移动端：控制抽屉显隐
-        this.sidebarCollapsed = !this.sidebarCollapsed
-      } else {
-        this.sidebarCollapsed = !this.sidebarCollapsed
-      }
+      this.sidebarCollapsed = !this.sidebarCollapsed
     },
 
     // 关闭移动端侧边栏（抽屉）

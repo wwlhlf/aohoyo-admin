@@ -1,16 +1,16 @@
 <script setup lang="ts">
-defineOptions({ name: 'Menu' })
-import { ref, reactive, onMounted, computed } from 'vue'
+defineOptions({ name: 'MenuManage' })
+import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import ResponsiveDialog from '@/components/ResponsiveDialog/index.vue'
 
-// 所有 Element Plus 图标
-const iconList = Object.keys(ElementPlusIconsVue)
+// 所有 Element Plus 图标名（来自 @iconify-json/ep）
+import epIcons from '@iconify-json/ep/icons.json'
+const iconList = Object.keys(epIcons.icons)
 
-// 表格数据 - 树形结构
+// 表格数据
 const tableData = ref([
   {
     id: 1,
@@ -20,7 +20,7 @@ const tableData = ref([
     icon: 'HomeFilled',
     sort: 1,
     status: 1,
-    type: 'menu',
+    type: 'dir',
     children: []
   },
   {
@@ -104,43 +104,48 @@ const tableData = ref([
   }
 ])
 
-const loading = ref(false)
-
-// 弹窗相关
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增菜单')
 const formRef = ref<FormInstance>()
+const iconPickerVisible = ref(false)
+const iconSearch = ref('')
+const submitting = ref(false)
 
-// 菜单类型
 const menuTypes = [
   { label: '目录', value: 'dir' },
   { label: '菜单', value: 'menu' },
   { label: '按钮', value: 'button' }
 ]
 
-// 扁平化菜单列表（用于选择父级）
-interface FlatMenuRow {
-  id: number
-  name: string
-  level?: number
-  [key: string]: unknown
-}
-const flatMenuList = computed(() => {
-  const result: FlatMenuRow[] = [{ id: 0, name: '顶级菜单' }]
-  const flatten = (list: FlatMenuRow[], level = 0) => {
-    list.forEach(item => {
-      result.push({ ...item, level })
-      const children = item.children as FlatMenuRow[] | undefined
-      if (children?.length) {
-        flatten(children, level + 1)
-      }
-    })
+// 父级菜单选项
+const parentOptions = computed(() => {
+  const result = [{ id: 0, name: '顶级菜单' }]
+  const walk = (list: typeof tableData.value, prefix = '') => {
+    for (const item of list) {
+      result.push({ id: item.id, name: prefix + item.name })
+      if (item.children?.length) walk(item.children, prefix + '  ')
+    }
   }
-  flatten(tableData.value as unknown as FlatMenuRow[], 0)
+  walk(tableData.value)
   return result
 })
 
-// 表单数据
+// 搜索过滤图标（分页，避免一次渲染 300+ 个）
+const PAGE_SIZE = 60
+const filteredIcons = computed(() => {
+  if (!iconSearch.value) return iconList
+  return iconList.filter(n => n.toLowerCase().includes(iconSearch.value.toLowerCase()))
+})
+const iconPage = ref(0)
+const visibleIcons = computed(() => {
+  const end = (iconPage.value + 1) * PAGE_SIZE
+  return filteredIcons.value.slice(0, end)
+})
+const hasMore = computed(() => visibleIcons.value.length < filteredIcons.value.length)
+const loadMoreIcons = () => {
+  iconPage.value++
+}
+
 const formData = reactive({
   id: 0,
   parentId: 0,
@@ -152,51 +157,49 @@ const formData = reactive({
   type: 'menu'
 })
 
-// 表单规则
 const rules: FormRules = {
   name: [{ required: true, message: '请输入菜单名称', trigger: 'blur' }],
   path: [{ required: true, message: '请输入路由路径', trigger: 'blur' }],
   type: [{ required: true, message: '请选择菜单类型', trigger: 'change' }]
 }
 
-// 图标选择器显示
-const iconPickerVisible = ref(false)
-
-// 选择图标
-const handleSelectIcon = (icon: string) => {
-  formData.icon = icon
-  iconPickerVisible.value = false
-}
-
-// 新增
-const handleAdd = (parentId: number = 0) => {
+const handleAdd = (parentId = 0) => {
   dialogTitle.value = '新增菜单'
-  resetForm()
-  formData.parentId = parentId
+  Object.assign(formData, {
+    id: 0,
+    parentId,
+    name: '',
+    path: '',
+    icon: '',
+    sort: 1,
+    status: 1,
+    type: 'menu'
+  })
+  iconPickerVisible.value = false
+  iconPage.value = 0
   dialogVisible.value = true
 }
 
-// 编辑
 const handleEdit = (row: typeof formData) => {
   dialogTitle.value = '编辑菜单'
   Object.assign(formData, JSON.parse(JSON.stringify(row)))
+  iconPickerVisible.value = false
+  iconPage.value = 0
   dialogVisible.value = true
 }
 
-// 删除
 const handleDelete = (row: typeof formData) => {
   ElMessageBox.confirm(`确定要删除菜单「${row.name}」吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-    loadData()
-  }).catch(() => {})
+  })
+    .then(() => ElMessage.success('删除成功'))
+    .catch(() => {
+      /* 用户取消删除 */
+    })
 }
 
-// 提交
-const submitting = ref(false)
 const handleSubmit = async () => {
   if (!formRef.value || submitting.value) return
   submitting.value = true
@@ -204,43 +207,30 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     ElMessage.success(formData.id ? '修改成功' : '新增成功')
     dialogVisible.value = false
-    loadData()
   } catch {
-    // 验证失败
+    /* 表单验证失败 */
   } finally {
     submitting.value = false
   }
 }
 
-// 重置表单
-const resetForm = () => {
-  formData.id = 0
-  formData.parentId = 0
-  formData.name = ''
-  formData.path = ''
-  formData.icon = ''
-  formData.sort = 1
-  formData.status = 1
-  formData.type = 'menu'
+const handleSelectIcon = (icon: string) => {
+  formData.icon = icon
+  iconPickerVisible.value = false
+  iconSearch.value = ''
+  iconPage.value = 0
 }
 
-// 加载数据
-const loadData = () => {
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
+const getTypeTag = (type: string) => {
+  if (type === 'dir') return { text: '目录', type: 'primary' as const }
+  if (type === 'menu') return { text: '菜单', type: 'success' as const }
+  return { text: '按钮', type: 'warning' as const }
 }
-
-onMounted(() => {
-  loadData()
-})
 </script>
 
 <template>
   <div class="page-container">
     <el-card>
-      <!-- 操作按钮 -->
       <template #header>
         <div class="card-header">
           <span>菜单管理</span>
@@ -251,36 +241,17 @@ onMounted(() => {
         </div>
       </template>
 
-      <!-- 表格 -->
       <ResponsiveTable min-width="860px">
-        <el-table
-          v-loading="loading"
-          :data="tableData"
-          row-key="id"
-          border
-          default-expand-all
-          style="width: 100%"
-        >
+        <el-table :data="tableData" row-key="id" border default-expand-all style="width: 100%">
           <el-table-column prop="name" label="菜单名称" min-width="180" />
-          <el-table-column label="图标" width="80" align="center">
-            <template #default="{ row }">
-              <el-icon v-if="row.icon" :size="18">
-                <component :is="row.icon" />
-              </el-icon>
-            </template>
-          </el-table-column>
-          <el-table-column prop="path" label="路由路径" min-width="180" />
           <el-table-column label="类型" width="90" align="center">
             <template #default="{ row }">
-              <el-tag
-                :type="row.type === 'dir' ? 'primary' : row.type === 'menu' ? 'success' : 'warning'"
-                size="small"
-                effect="dark"
-              >
-                {{ row.type === 'dir' ? '目录' : row.type === 'menu' ? '菜单' : '按钮' }}
+              <el-tag :type="getTypeTag(row.type).type" size="small" effect="dark">
+                {{ getTypeTag(row.type).text }}
               </el-tag>
             </template>
           </el-table-column>
+          <el-table-column prop="path" label="路由路径" min-width="180" />
           <el-table-column prop="sort" label="排序" width="70" align="center" />
           <el-table-column label="状态" width="80" align="center">
             <template #default="{ row }">
@@ -289,7 +260,7 @@ onMounted(() => {
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column label="操作" width="200" fixed="right">
             <template #default="{ row }">
               <el-button
                 v-if="row.type !== 'button'"
@@ -309,26 +280,17 @@ onMounted(() => {
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <ResponsiveDialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      desktop-width="550px"
-    >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="rules"
-        label-width="100px"
-      >
+    <ResponsiveDialog v-model="dialogVisible" :title="dialogTitle" desktop-width="500px">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
         <el-form-item label="上级菜单">
-          <el-tree-select
-            v-model="formData.parentId"
-            :data="flatMenuList"
-            :props="{ label: 'name', value: 'id', children: 'children' }"
-            check-strictly
-            placeholder="请选择上级菜单"
-            style="width: 100%"
-          />
+          <el-select v-model="formData.parentId" placeholder="请选择上级菜单" style="width: 100%">
+            <el-option
+              v-for="item in parentOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="菜单类型" prop="type">
           <el-radio-group v-model="formData.type">
@@ -345,24 +307,33 @@ onMounted(() => {
         </el-form-item>
         <el-form-item v-if="formData.type !== 'button'" label="图标">
           <div class="icon-picker-trigger" @click="iconPickerVisible = !iconPickerVisible">
-            <el-icon v-if="formData.icon" :size="20">
-              <component :is="formData.icon" />
-            </el-icon>
+            <span v-if="formData.icon" class="selected-icon">
+              <Icon :icon="`ep:${formData.icon}`" />
+              {{ formData.icon }}
+            </span>
             <span v-else class="placeholder">点击选择图标</span>
             <el-icon class="arrow"><ArrowDown /></el-icon>
           </div>
-          <!-- 图标选择面板 -->
-          <div v-if="iconPickerVisible" class="icon-picker-panel">
+          <div v-show="iconPickerVisible" class="icon-picker-panel">
+            <el-input
+              v-model="iconSearch"
+              placeholder="搜索图标..."
+              size="small"
+              class="icon-search"
+            />
             <div class="icon-grid">
               <div
-                v-for="icon in iconList"
+                v-for="icon in visibleIcons"
                 :key="icon"
                 class="icon-item"
                 :class="{ active: formData.icon === icon }"
                 @click="handleSelectIcon(icon)"
               >
-                <el-icon :size="20"><component :is="icon" /></el-icon>
+                <Icon :icon="`ep:${icon}`" :width="18" :height="18" />
               </div>
+            </div>
+            <div v-if="hasMore" class="load-more" @click="loadMoreIcons">
+              加载更多 ({{ visibleIcons.length }}/{{ filteredIcons.length }})
             </div>
           </div>
         </el-form-item>
@@ -385,7 +356,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 图标选择器 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .icon-picker-trigger {
   display: flex;
   align-items: center;
@@ -398,20 +373,22 @@ onMounted(() => {
   cursor: pointer;
   transition: border-color 0.2s;
 }
-
 .icon-picker-trigger:hover {
   border-color: var(--el-color-primary);
 }
-
 .placeholder {
   color: var(--el-text-color-placeholder);
   font-size: 14px;
 }
-
+.selected-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
 .arrow {
   color: var(--el-text-color-placeholder);
 }
-
 .icon-picker-panel {
   position: absolute;
   top: 100%;
@@ -427,19 +404,14 @@ onMounted(() => {
   max-height: 300px;
   overflow-y: auto;
 }
-
+.icon-search {
+  margin-bottom: 8px;
+}
 .icon-grid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
-
-@media (max-width: 768px) {
-  .icon-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
 .icon-item {
   display: flex;
   align-items: center;
@@ -451,15 +423,23 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .icon-item:hover {
   border-color: var(--el-color-primary);
   color: var(--el-color-primary);
 }
-
 .icon-item.active {
   border-color: var(--el-color-primary);
   background-color: var(--el-color-primary-light-9);
   color: var(--el-color-primary);
+}
+.load-more {
+  text-align: center;
+  padding: 8px;
+  color: var(--el-color-primary);
+  cursor: pointer;
+  font-size: 13px;
+}
+.load-more:hover {
+  opacity: 0.8;
 }
 </style>

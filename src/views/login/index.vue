@@ -11,6 +11,9 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
+// 开发环境标识
+const isDev = import.meta.env.DEV
+
 // 表单引用
 const formRef = ref<FormInstance>()
 const loading = ref(false)
@@ -42,7 +45,7 @@ const handleLogin = async () => {
       // 跳转到目标页面或首页
       const redirect = (route.query.redirect as string) || '/'
       router.push(redirect)
-    } catch (error) {
+    } catch {
       ElMessage.error(t('login.loginFailed'))
     } finally {
       loading.value = false
@@ -103,8 +106,8 @@ const handleKeyup = (e: KeyboardEvent) => {
         </el-form-item>
       </el-form>
 
-      <!-- 提示 -->
-      <div class="login-footer">
+      <!-- 提示（仅开发环境） -->
+      <div v-if="isDev" class="login-footer">
         <p>默认账号：admin / admin123</p>
       </div>
     </div>

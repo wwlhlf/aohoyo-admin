@@ -1,5 +1,9 @@
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+import { hasPermission } from '@/utils/permission'
 import type { Router } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import i18n from '@/locales'
 import defaultSettings from '@/config/settings'
 
 // 白名单路由
@@ -11,10 +15,12 @@ const whiteList = ['/login', '/404']
 export function setupRouterGuards(router: Router) {
   // 前置守卫
   router.beforeEach((to, _from, next) => {
+    NProgress.start()
+
     // 设置页面标题
     const title = to.meta?.title
     if (title) {
-      document.title = `${title} | ${defaultSettings.title}`
+      document.title = `${i18n.global.t(title as string)} | ${defaultSettings.title}`
     } else {
       document.title = defaultSettings.title
     }
@@ -28,8 +34,12 @@ export function setupRouterGuards(router: Router) {
         // 已登录，去登录页 -> 重定向到首页
         next({ path: '/' })
       } else {
-        // 已登录，正常访问
-        // TODO: 检查权限
+        // 检查页面所需权限
+        const requiredPermission = to.meta?.permission as string | string[]
+        if (requiredPermission && !hasPermission(requiredPermission)) {
+          next('/404')
+          return
+        }
         next()
       }
     } else {
@@ -48,8 +58,7 @@ export function setupRouterGuards(router: Router) {
 
   // 后置守卫
   router.afterEach(() => {
-    // 关闭页面加载进度条（如果有的话）
-    // NProgress.done()
+    NProgress.done()
   })
 
   // 错误处理

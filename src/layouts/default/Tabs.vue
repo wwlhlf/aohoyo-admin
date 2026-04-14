@@ -32,7 +32,7 @@ watch(
     if (route.meta?.title && !route.meta?.hidden) {
       tabsStore.addTab({
         path: route.path,
-        title: route.meta.title as string,
+        title: t(route.meta.title as string),
         name: route.name as string,
         icon: route.meta.icon as string
       })

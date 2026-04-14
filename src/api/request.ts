@@ -12,7 +12,7 @@ import { useUserStore } from '@/stores/user'
 // ============ 类型定义 ============
 
 /** API 响应结构 */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number
   data: T
   message: string
@@ -146,7 +146,7 @@ service.interceptors.response.use(
 
     // 业务成功
     if (data.code === 200) {
-      return data.data
+      return data.data as typeof response
     }
 
     // 业务失败
@@ -193,19 +193,19 @@ service.interceptors.response.use(
 // ============ 请求方法 ============
 
 const request = {
-  get: <T = any>(url: string, params?: object, config?: AxiosRequestConfig): Promise<T> =>
+  get: <T = unknown>(url: string, params?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.get(url, { params, ...config }),
 
-  post: <T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
+  post: <T = unknown>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.post(url, data, config),
 
-  put: <T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
+  put: <T = unknown>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.put(url, data, config),
 
-  del: <T = any>(url: string, params?: object, config?: AxiosRequestConfig): Promise<T> =>
+  del: <T = unknown>(url: string, params?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.delete(url, { params, ...config }),
 
-  patch: <T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
+  patch: <T = unknown>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> =>
     service.patch(url, data, config)
 }
 

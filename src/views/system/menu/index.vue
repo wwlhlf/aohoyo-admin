@@ -1,14 +1,213 @@
 <script setup lang="ts">
 defineOptions({ name: 'MenuManage' })
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getMenuList } from '@/api/modules/system'
 import type { FormInstance, FormRules } from 'element-plus'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import ResponsiveDialog from '@/components/ResponsiveDialog/index.vue'
 
-// 所有 Element Plus 图标名（来自 @iconify-json/ep）
-import epIcons from '@iconify-json/ep/icons.json'
-const iconList = Object.keys(epIcons.icons)
+// Element Plus 图标列表（硬编码，避免额外依赖）
+const ICON_LIST = [
+  // 通用
+  'HomeFilled',
+  'User',
+  'UserFilled',
+  'Setting',
+  'Menu',
+  'Document',
+  'Folder',
+  'Grid',
+  'PictureFilled',
+  'EditPen',
+  'Delete',
+  'Plus',
+  'Search',
+  'View',
+  'Hide',
+  'Close',
+  'Check',
+  'Refresh',
+  'Download',
+  'Upload',
+  'Bell',
+  'Clock',
+  'Star',
+  // 系统
+  'Lock',
+  'Unlock',
+  'Key',
+  'Shield',
+  'Safety',
+  'SecurityScan',
+  // 文件
+  'Files',
+  'DocumentCopy',
+  'DocumentAdd',
+  'DocumentDelete',
+  'Tickets',
+  // 数据
+  'TrendCharts',
+  'LineChart',
+  'PieChart',
+  'BarChart',
+  'DataLine',
+  'DataAnalysis',
+  'BoxPlot',
+  'Histogram',
+  'Scale',
+  // 媒体
+  'VideoCamera',
+  'Microphone',
+  'Camera',
+  'Film',
+  // 工具
+  'Tools',
+  'Tool',
+  'Wrench',
+  'Hammer',
+  'Compass',
+  'Aim',
+  // 商业
+  'OfficeBuilding',
+  'School',
+  'House',
+  'Shop',
+  'ShoppingCart',
+  'Goods',
+  'Coin',
+  'Money',
+  'PriceTag',
+  'Discount',
+  'Sell',
+  // 通讯
+  'Message',
+  'ChatDotRound',
+  'Phone',
+  'Postcard',
+  'Mail',
+  'ChatLine',
+  // 位置
+  'Coordinate',
+  'Position',
+  'Location',
+  'MapLocation',
+  // 时间
+  'Timer',
+  'Stopwatch',
+  'Calendar',
+  'DatePicker',
+  // 操作
+  'Link',
+  'Share',
+  'Promotion',
+  'CopyDocument',
+  'Cut',
+  'Brush',
+  'ZoomIn',
+  'ZoomOut',
+  'FullScreen',
+  'ExitFullScreen',
+  // 状态
+  'Warning',
+  'WarningFilled',
+  'CircleCheck',
+  'CircleCheckFilled',
+  'SuccessFilled',
+  'Info',
+  'InfoFilled',
+  'QuestionFilled',
+  'ErrorFilled',
+  'Sunny',
+  'Moon',
+  'MoonFilled',
+  // 导航
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+  'DArrowLeft',
+  'DArrowRight',
+  'Top',
+  'Bottom',
+  'Back',
+  'TopLeft',
+  'TopRight',
+  'Sort',
+  'SortUp',
+  'SortDown',
+  'Filter',
+  'FilterEdit',
+  'More',
+  'MoreFilled',
+  'More1',
+  'Fold',
+  'Expand',
+  'SetUp',
+  'Operation',
+  // 用户
+  'Avatar',
+  'User',
+  'Male',
+  'Female',
+  'IdCard',
+  'Medal',
+  'Trophy',
+  // 其他
+  'Collection',
+  'Bookmark',
+  'Label',
+  'Flag',
+  'Connection',
+  'LinkBroken',
+  'Lightning',
+  'Battery',
+  'Cpu',
+  'Monitor',
+  'Keyboard',
+  'Mouse',
+  'Van',
+  'Bus',
+  'Car',
+  'Airplane'
+]
+
+// 过滤后的图标
+const PAGE_SIZE = 48
+const iconPage = ref(1)
+const iconSearch = ref('')
+const loading = ref(false)
+const iconPickerVisible = ref(false)
+const filteredIcons = computed(() => {
+  if (!iconSearch.value) return ICON_LIST
+  const q = iconSearch.value.toLowerCase()
+  return ICON_LIST.filter(i => i.toLowerCase().includes(q))
+})
+const visibleIcons = computed(() => {
+  const end = iconPage.value * PAGE_SIZE
+  return filteredIcons.value.slice(0, end)
+})
+const hasMore = computed(() => visibleIcons.value.length < filteredIcons.value.length)
+
+const loadMenu = async () => {
+  loading.value = true
+  try {
+    const list = (await getMenuList()) as any
+    tableData.value = list
+  } catch {
+    ElMessage.error('获取菜单列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadMenu()
+})
+
+const loadMoreIcons = () => {
+  iconPage.value++
+}
 
 // 表格数据
 const tableData = ref([
@@ -49,7 +248,7 @@ const tableData = ref([
         parentId: 2,
         name: '角色管理',
         path: '/system/role',
-        icon: 'UserFilled',
+        icon: 'Key',
         sort: 2,
         status: 1,
         type: 'menu',
@@ -81,7 +280,7 @@ const tableData = ref([
       {
         id: 7,
         parentId: 6,
-        name: '表格示例',
+        name: '综合表格',
         path: '/example/table',
         icon: 'Grid',
         sort: 1,
@@ -104,47 +303,37 @@ const tableData = ref([
   }
 ])
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('新增菜单')
-const formRef = ref<FormInstance>()
-const iconPickerVisible = ref(false)
-const iconSearch = ref('')
-const submitting = ref(false)
+// 父级菜单选项
+const parentOptions = computed(() => {
+  const flatten = (
+    list: typeof tableData.value,
+    prefix = ''
+  ): Array<{ id: number; name: string }> => {
+    return list.flatMap(item => [
+      { id: item.id, name: prefix + item.name },
+      ...flatten(item.children || [], prefix + item.name + ' / ')
+    ])
+  }
+  return flatten(tableData.value)
+})
 
+// 菜单类型选项
 const menuTypes = [
   { label: '目录', value: 'dir' },
   { label: '菜单', value: 'menu' },
   { label: '按钮', value: 'button' }
 ]
 
-// 父级菜单选项
-const parentOptions = computed(() => {
-  const result = [{ id: 0, name: '顶级菜单' }]
-  const walk = (list: typeof tableData.value, prefix = '') => {
-    for (const item of list) {
-      result.push({ id: item.id, name: prefix + item.name })
-      if (item.children?.length) walk(item.children, prefix + '  ')
-    }
-  }
-  walk(tableData.value)
-  return result
-})
+const dialogVisible = ref(false)
+const dialogTitle = ref('新增菜单')
+const formRef = ref<FormInstance>()
+const submitting = ref(false)
 
-// 搜索过滤图标（分页，避免一次渲染 300+ 个）
-const PAGE_SIZE = 60
-const filteredIcons = computed(() => {
-  if (!iconSearch.value) return iconList
-  return iconList.filter(n => n.toLowerCase().includes(iconSearch.value.toLowerCase()))
-})
-const iconPage = ref(0)
-const visibleIcons = computed(() => {
-  const end = (iconPage.value + 1) * PAGE_SIZE
+const visibleIcons2 = ref(1)
+const visibleIconsRef = computed(() => {
+  const end = iconPage.value * PAGE_SIZE
   return filteredIcons.value.slice(0, end)
 })
-const hasMore = computed(() => visibleIcons.value.length < filteredIcons.value.length)
-const loadMoreIcons = () => {
-  iconPage.value++
-}
 
 const formData = reactive({
   id: 0,
@@ -176,7 +365,7 @@ const handleAdd = (parentId = 0) => {
     type: 'menu'
   })
   iconPickerVisible.value = false
-  iconPage.value = 0
+  iconPage.value = 1
   dialogVisible.value = true
 }
 
@@ -184,7 +373,7 @@ const handleEdit = (row: typeof formData) => {
   dialogTitle.value = '编辑菜单'
   Object.assign(formData, JSON.parse(JSON.stringify(row)))
   iconPickerVisible.value = false
-  iconPage.value = 0
+  iconPage.value = 1
   dialogVisible.value = true
 }
 
@@ -195,9 +384,7 @@ const handleDelete = (row: typeof formData) => {
     type: 'warning'
   })
     .then(() => ElMessage.success('删除成功'))
-    .catch(() => {
-      /* 用户取消删除 */
-    })
+    .catch(() => {})
 }
 
 const handleSubmit = async () => {
@@ -208,7 +395,7 @@ const handleSubmit = async () => {
     ElMessage.success(formData.id ? '修改成功' : '新增成功')
     dialogVisible.value = false
   } catch {
-    /* 表单验证失败 */
+    /* 验证失败 */
   } finally {
     submitting.value = false
   }
@@ -218,13 +405,19 @@ const handleSelectIcon = (icon: string) => {
   formData.icon = icon
   iconPickerVisible.value = false
   iconSearch.value = ''
-  iconPage.value = 0
+  iconPage.value = 1
 }
 
 const getTypeTag = (type: string) => {
   if (type === 'dir') return { text: '目录', type: 'primary' as const }
   if (type === 'menu') return { text: '菜单', type: 'success' as const }
   return { text: '按钮', type: 'warning' as const }
+}
+
+// 动态图标组件
+const IconComponent = (name: string) => {
+  // 尝试解析图标名称，返回 null 表示未找到
+  return name
 }
 </script>
 
@@ -252,6 +445,11 @@ const getTypeTag = (type: string) => {
             </template>
           </el-table-column>
           <el-table-column prop="path" label="路由路径" min-width="180" />
+          <el-table-column label="图标" width="90" align="center">
+            <template #default="{ row }">
+              <el-icon><component :is="row.icon" /></el-icon>
+            </template>
+          </el-table-column>
           <el-table-column prop="sort" label="排序" width="70" align="center" />
           <el-table-column label="状态" width="80" align="center">
             <template #default="{ row }">
@@ -280,7 +478,7 @@ const getTypeTag = (type: string) => {
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <ResponsiveDialog v-model="dialogVisible" :title="dialogTitle" desktop-width="500px">
+    <ResponsiveDialog v-model="dialogVisible" :title="dialogTitle" desktop-width="560px">
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
         <el-form-item label="上级菜单">
           <el-select v-model="formData.parentId" placeholder="请选择上级菜单" style="width: 100%">
@@ -305,10 +503,11 @@ const getTypeTag = (type: string) => {
         <el-form-item v-if="formData.type !== 'button'" label="路由路径" prop="path">
           <el-input v-model="formData.path" placeholder="请输入路由路径" />
         </el-form-item>
+        <!-- 图标选择器 -->
         <el-form-item v-if="formData.type !== 'button'" label="图标">
           <div class="icon-picker-trigger" @click="iconPickerVisible = !iconPickerVisible">
             <span v-if="formData.icon" class="selected-icon">
-              <Icon :icon="`ep:${formData.icon}`" />
+              <el-icon><component :is="formData.icon" /></el-icon>
               {{ formData.icon }}
             </span>
             <span v-else class="placeholder">点击选择图标</span>
@@ -327,9 +526,10 @@ const getTypeTag = (type: string) => {
                 :key="icon"
                 class="icon-item"
                 :class="{ active: formData.icon === icon }"
+                :title="icon"
                 @click="handleSelectIcon(icon)"
               >
-                <Icon :icon="`ep:${icon}`" :width="18" :height="18" />
+                <el-icon><component :is="icon" /></el-icon>
               </div>
             </div>
             <div v-if="hasMore" class="load-more" @click="loadMoreIcons">
@@ -401,7 +601,7 @@ const getTypeTag = (type: string) => {
   border-radius: var(--border-radius);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
 }
 .icon-search {
@@ -438,8 +638,5 @@ const getTypeTag = (type: string) => {
   color: var(--el-color-primary);
   cursor: pointer;
   font-size: 13px;
-}
-.load-more:hover {
-  opacity: 0.8;
 }
 </style>

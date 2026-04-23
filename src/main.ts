@@ -2,7 +2,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+// Element Plus styles — resolver auto-imports component CSS (importStyle: false)
+import 'element-plus/theme-chalk/base.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import App from './App.vue'

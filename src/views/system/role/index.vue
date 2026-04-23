@@ -4,6 +4,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useResponsive } from '@/composables/useResponsive'
+import { getRoleList } from '@/api/modules/system'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import ResponsiveDialog from '@/components/ResponsiveDialog/index.vue'
 import ResponsiveSearch from '@/components/ResponsiveSearch/index.vue'
@@ -144,11 +145,17 @@ const handleSearch = () => {
 }
 
 // 加载数据
-const loadData = () => {
+const loadData = async () => {
   loading.value = true
-  setTimeout(() => {
+  try {
+    const res = (await getRoleList(queryParams)) as any
+    tableData.value = res.list
+    total.value = res.total
+  } catch {
+    ElMessage.error('获取角色列表失败')
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
 // 新增
@@ -180,10 +187,12 @@ const handleDelete = (row: typeof formData) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-    loadData()
-  }).catch(() => {})
+  })
+    .then(() => {
+      ElMessage.success('删除成功')
+      loadData()
+    })
+    .catch(() => {})
 }
 
 // 提交
@@ -285,17 +294,8 @@ onMounted(() => {
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <ResponsiveDialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      desktop-width="700px"
-    >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="rules"
-        label-width="100px"
-      >
+    <ResponsiveDialog v-model="dialogVisible" :title="dialogTitle" desktop-width="700px">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
         <el-row :gutter="20">
           <el-col :sm="12">
             <el-form-item label="角色名称" prop="name">

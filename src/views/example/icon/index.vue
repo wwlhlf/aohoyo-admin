@@ -45,7 +45,7 @@ function copy(name: string) {
             style="width: 240px"
             @input="page = 0"
           >
-            <template #prefix><i-ep-Search /></template>
+            <template #prefix><Search /></template>
           </el-input>
         </div>
       </template>
@@ -58,7 +58,7 @@ function copy(name: string) {
           :title="name"
           @click="copy(name)"
         >
-          <el-icon :size="28"><component :is="`i-ep-${name}`" /></el-icon>
+          <el-icon :size="28"><component :is="name" /></el-icon>
           <span class="icon-name">{{ name }}</span>
         </div>
       </div>
@@ -68,7 +68,7 @@ function copy(name: string) {
       </div>
 
       <div v-if="filtered.length === 0" class="empty">
-        <el-icon :size="48"><i-ep-Search /></el-icon>
+        <el-icon :size="48"><Search /></el-icon>
         <p>未找到图标「{{ search }}」</p>
       </div>
     </el-card>

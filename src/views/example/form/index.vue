@@ -78,8 +78,8 @@ const handleReset = () => {
 
         <el-form-item label="性别" prop="gender">
           <el-radio-group v-model="formData.gender">
-            <el-radio label="male">男</el-radio>
-            <el-radio label="female">女</el-radio>
+            <el-radio value="male">男</el-radio>
+            <el-radio value="female">女</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -106,5 +106,4 @@ const handleReset = () => {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

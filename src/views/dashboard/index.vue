@@ -164,7 +164,7 @@ onUnmounted(() => {
               class="action-item"
               @click="handleQuickAction(action.route)"
             >
-              <el-icon :size="24"><component :is="`i-ep-${action.icon}`" /></el-icon>
+              <el-icon :size="24"><component :is="action.icon" /></el-icon>
               <span>{{ t(`dashboard.${action.label}`) }}</span>
             </div>
           </div>

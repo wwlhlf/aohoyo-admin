@@ -14,7 +14,9 @@ node_modules
 
 # Build
 dist
+dist/report.html
 dist-ssr
+dist/report.html
 *.local
 
 # Editor
@@ -39,4 +41,4 @@ dist-ssr
 coverage
 
 # Misc
-*.local
+*.localvisualizer.html

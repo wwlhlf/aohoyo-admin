@@ -1,17 +1,5 @@
 import type { MockMethod } from 'vite-plugin-mock'
 
-// Mock 日志
-const mockLog = (method: string, url: string, params: unknown, response: unknown) => {
-  console.group(
-    `%c🎭 Mock Request: ${method} ${url}`,
-    'color: #9c27b0; font-weight: bold; font-size: 13px;'
-  )
-  console.log('📥 参数:', params)
-  console.log('📦 返回:', response)
-  console.groupEnd()
-}
-
-// 模拟用户数据
 const users = [
   {
     id: 1,
@@ -55,7 +43,6 @@ const users = [
   }
 ]
 
-// 模拟角色数据
 const roles = [
   {
     id: 1,
@@ -77,7 +64,6 @@ const roles = [
   }
 ]
 
-// 模拟菜单数据
 const menus = [
   { id: 1, parentId: 0, name: '首页', path: '/dashboard', icon: 'HomeFilled', sort: 1, status: 1 },
   { id: 2, parentId: 0, name: '系统管理', path: '/system', icon: 'Setting', sort: 2, status: 1 },
@@ -114,63 +100,36 @@ const menus = [
 ]
 
 export default [
-  // 用户列表
   {
     url: '/api/system/user/list',
     method: 'get',
-    response: ({ query }: { query: { page: number; pageSize: number; keyword?: string } }) => {
-      const { page = 1, pageSize = 10, keyword } = query
-
+    response: ({ query }: { query: { page?: number; pageSize?: number; keyword?: string } }) => {
+      const { page = 1, pageSize = 10, keyword = '' } = query
       let list = users
-      if (keyword) {
+      if (keyword)
         list = list.filter(u => u.username.includes(keyword) || u.nickname.includes(keyword))
-      }
-
-      const response = {
+      return {
         code: 200,
-        data: {
-          list: list.slice((page - 1) * pageSize, page * pageSize),
-          total: list.length
-        },
+        data: { list: list.slice((page - 1) * pageSize, page * pageSize), total: list.length },
         message: 'success'
       }
-      mockLog('GET', '/api/system/user/list', query, response)
-      return response
     }
   },
-
-  // 角色列表
   {
     url: '/api/system/role/list',
     method: 'get',
-    response: ({ query }: { query: { page: number; pageSize: number } }) => {
+    response: ({ query }: { query: { page?: number; pageSize?: number } }) => {
       const { page = 1, pageSize = 10 } = query
-
-      const response = {
+      return {
         code: 200,
-        data: {
-          list: roles.slice((page - 1) * pageSize, page * pageSize),
-          total: roles.length
-        },
+        data: { list: roles.slice((page - 1) * pageSize, page * pageSize), total: roles.length },
         message: 'success'
       }
-      mockLog('GET', '/api/system/role/list', query, response)
-      return response
     }
   },
-
-  // 菜单列表
   {
     url: '/api/system/menu/list',
     method: 'get',
-    response: () => {
-      const response = {
-        code: 200,
-        data: menus,
-        message: 'success'
-      }
-      mockLog('GET', '/api/system/menu/list', {}, response)
-      return response
-    }
+    response: () => ({ code: 200, data: menus, message: 'success' })
   }
 ] as MockMethod[]

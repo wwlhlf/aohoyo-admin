@@ -112,6 +112,15 @@ export const asyncRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'icon',
+        name: 'IconExample',
+        component: () => import('@/views/example/icon/index.vue'),
+        meta: {
+          title: 'nav.icon',
+          icon: 'PictureFilled'
+        }
+      },
+      {
         path: 'form',
         name: 'FormExample',
         component: () => import('@/views/example/form/index.vue'),
@@ -126,7 +135,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
   {
     path: '/redirect/:path(.*)',
     component: () => import('@/layouts/default/index.vue'),
-    beforeEnter: (to) => {
+    beforeEnter: to => {
       const path = '/' + (to.params.path as string[]).join('/')
       return path
     },

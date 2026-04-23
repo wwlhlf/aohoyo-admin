@@ -28,6 +28,7 @@ export default {
     menu: '菜单管理',
     example: '示例页面',
     table: '表格示例',
+    icon: '图标示例',
     form: '表单示例',
     profile: '个人中心'
   },

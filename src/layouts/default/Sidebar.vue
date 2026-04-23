@@ -94,7 +94,7 @@ const toggleCollapse = () => {
           <!-- 有子菜单 -->
           <el-sub-menu v-if="item.children && item.children.length > 0" :index="item.path">
             <template #title>
-              <el-icon v-if="item.meta?.icon"><component :is="item.meta.icon" /></el-icon>
+              <el-icon v-if="item.meta?.icon"><component :is="`i-ep-${item.meta.icon}`" /></el-icon>
               <span>{{ t(item.meta?.title as string) }}</span>
             </template>
 
@@ -106,7 +106,9 @@ const toggleCollapse = () => {
                 :index="`${item.path}/${child.path}`"
               >
                 <template #title>
-                  <el-icon v-if="child.meta?.icon"><component :is="child.meta.icon" /></el-icon>
+                  <el-icon v-if="child.meta?.icon">
+                    <component :is="`i-ep-${child.meta.icon}`" />
+                  </el-icon>
                   <span>{{ t(child.meta?.title as string) }}</span>
                 </template>
                 <el-menu-item
@@ -115,7 +117,7 @@ const toggleCollapse = () => {
                   :index="`${item.path}/${child.path}/${subChild.path}`"
                 >
                   <el-icon v-if="subChild.meta?.icon">
-                    <component :is="subChild.meta.icon" />
+                    <component :is="`i-ep-${subChild.meta.icon}`" />
                   </el-icon>
                   <span>{{ t(subChild.meta?.title as string) }}</span>
                 </el-menu-item>
@@ -126,7 +128,9 @@ const toggleCollapse = () => {
                 v-else
                 :index="item.path === '/' ? `/${child.path}` : `${item.path}/${child.path}`"
               >
-                <el-icon v-if="child.meta?.icon"><component :is="child.meta.icon" /></el-icon>
+                <el-icon v-if="child.meta?.icon">
+                  <component :is="`i-ep-${child.meta.icon}`" />
+                </el-icon>
                 <template #title>{{ t(child.meta?.title as string) }}</template>
               </el-menu-item>
             </template>
@@ -134,7 +138,7 @@ const toggleCollapse = () => {
 
           <!-- 无子菜单 -->
           <el-menu-item v-else :index="(item.redirect || item.path) as string">
-            <el-icon v-if="item.meta?.icon"><component :is="item.meta.icon" /></el-icon>
+            <el-icon v-if="item.meta?.icon"><component :is="`i-ep-${item.meta.icon}`" /></el-icon>
             <template #title>{{ t(item.meta?.title as string) }}</template>
           </el-menu-item>
         </template>
@@ -144,7 +148,7 @@ const toggleCollapse = () => {
     <!-- 折叠按钮（仅桌面端显示） -->
     <div v-if="!isMobile" class="sidebar-collapse-btn" @click="toggleCollapse">
       <el-icon :size="18">
-        <component :is="isCollapsed ? 'Expand' : 'Fold'" />
+        <component :is="isCollapsed ? 'i-ep-ArrowRight' : 'i-ep-ArrowLeft'" />
       </el-icon>
     </div>
   </div>

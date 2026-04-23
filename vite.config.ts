@@ -12,12 +12,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 export default defineConfig({
   plugins: [
     vue(),
-    // AutoImport 只处理 Vue/Router/Pinia hooks，不再处理 ElementPlus 组件（避免 icons 全量导入）
     AutoImport({
       imports: ['vue', 'vue-router', 'pinia'],
       dts: 'src/auto-imports.d.ts'
     }),
-    // Element Plus 组件按需导入（不含 icons）
     Components({
       resolvers: [ElementPlusResolver({ importStyle: false })],
       dts: 'src/components.d.ts'
@@ -28,10 +26,9 @@ export default defineConfig({
       enable: process.env.NODE_ENV === 'development'
     }),
     visualizer({
-      filename: 'dist/report.html',
       open: false,
       gzipSize: true,
-      brotliSize: true
+      filename: 'visualizer.html'
     })
   ],
   resolve: {
@@ -39,36 +36,22 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
-  server: {
-    host: '0.0.0.0',
-    port: 3000,
-    allowedHosts: ['nas.banayou.com', 'localhost'],
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '')
-      }
-    }
-  },
   build: {
     rollupOptions: {
       output: {
-        chunkFileNames: 'static/js/[name]-[hash].js',
-        entryFileNames: 'static/js/[name]-[hash].js',
-        assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
+        // Rolldown 不支持 object manualChunks，统一放 vendor
         manualChunks(id) {
-          if (id.includes('node_modules/echarts')) {
-            return 'echarts-vendor'
-          }
-          if (id.includes('node_modules/element-plus')) {
-            return 'element-plus-vendor'
-          }
-          if (id.includes('node_modules/@iconify')) {
-            return 'iconify-vendor'
+          if (id.includes('node_modules')) {
+            if (id.includes('element-plus')) return 'element-plus'
+            if (id.includes('echarts') || id.includes('vue-echarts')) return 'echarts'
+            if (id.includes('@iconify')) return 'iconify'
+            return 'vendor'
           }
         }
       }
     }
+  },
+  optimizeDeps: {
+    include: ['element-plus', 'echarts', 'vue-echarts', '@iconify/vue']
   }
 })

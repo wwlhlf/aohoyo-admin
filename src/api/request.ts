@@ -23,7 +23,7 @@ import type {
   AxiosResponse,
   InternalAxiosRequestConfig
 } from 'axios'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus/es'
 import { useUserStore } from '@/stores/user'
 
 // ============ 类型定义 ============
@@ -84,10 +84,7 @@ const logger = {
   request(config: InternalAxiosRequestConfig) {
     if (!this.enabled) return
     const method = config.method?.toUpperCase() || 'GET'
-    console.group(
-      `%c📤 API Request: ${method} ${config.url}`,
-      'color: #42b983; font-weight: bold;'
-    )
+    console.group(`%c📤 API Request: ${method} ${config.url}`, 'color: #42b983; font-weight: bold;')
     console.log('📥 参数:', config.params || config.data || {})
     console.log('🔗 URL:', `${config.baseURL}${config.url}`)
     console.log('🔑 Headers:', config.headers)
@@ -99,10 +96,7 @@ const logger = {
     if (!this.enabled) return
     const startTime = response.config.meta?.requestTime || 0
     const duration = startTime ? Date.now() - startTime : 0
-    console.group(
-      `%c📥 API Response: ${response.config.url}`,
-      'color: #67c23a; font-weight: bold;'
-    )
+    console.group(`%c📥 API Response: ${response.config.url}`, 'color: #67c23a; font-weight: bold;')
     console.log('📊 状态:', response.status)
     console.log('📦 数据:', response.data)
     console.log('⏱️ 耗时:', `${duration}ms`)
@@ -113,10 +107,7 @@ const logger = {
   error(err: unknown) {
     if (!this.enabled) return
     const error = err as AxiosError
-    console.group(
-      `%c❌ API Error: ${error.config?.url}`,
-      'color: #f56c6c; font-weight: bold;'
-    )
+    console.group(`%c❌ API Error: ${error.config?.url}`, 'color: #f56c6c; font-weight: bold;')
     console.log('❗ 信息:', error.message)
     console.log('📊 状态码:', error.response?.status)
     console.log('📦 响应:', error.response?.data)

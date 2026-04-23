@@ -40,13 +40,12 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('echarts')) return 'echarts'
-            if (id.includes('element-plus')) return 'element-plus'
           }
         }
       }
     }
   },
   optimizeDeps: {
-    include: ['element-plus', 'echarts', 'vue-echarts']
+    include: ['echarts', 'vue-echarts']
   }
 })
